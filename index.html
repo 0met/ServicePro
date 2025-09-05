@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServicePro Field Service App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: bold;
+            font-size: 24px;
+        }
+        
+        .logo i {
+            font-size: 28px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .role-selector {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .role-selector option {
+            background: white;
+            color: #333;
+        }
+        
+        /* Navigation */
+        .nav {
+            background: white;
+            padding: 0 24px;
+            display: flex;
+            gap: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow-x: auto;
+        }
+        
+        .nav-button {
+            padding: 16px 0;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .nav-button.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+        
+        .nav-button:hover {
+            color: #2563eb;
+        }
+        
+        /* Alert Banner */
+        .alert-banner {
+            background: linear-gradient(to right, #fee2e2, #ffedd5);
+            border-left: 4px solid #ef4444;
+            padding: 16px 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .alert-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #b45309;
+        }
+        
+        .alert-content i {
+            font-size: 20px;
+        }
+        
+        .alert-button {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .metric-card {
+            padding: 20px;
+            border-radius: 12px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-blue {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+        
+        .metric-green {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        }
+        
+        .metric-orange {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        }
+        
+        .metric-purple {
+            background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+        }
+        
+        .metric-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .metric-title {
+            font-size: 14px;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+        
+        .metric-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .metric-subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .metric-icon {
+            font-size: 32px;
+            opacity: 0.8;
+        }
+        
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .info-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            color: #334155;
+        }
+        
+        .info-card-header i {
+            color: #2563eb;
+        }
+        
+        /* Customer Management */
+        .customer-management {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+        
+        .customer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .customer-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .customer-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 16px;
+        }
+        
+        .search-box input {
+            border: none;
+            background: transparent;
+            margin-left: 8px;
+            outline: none;
+        }
+        
+        .customer-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .customer-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+        }
+        
+        .customer-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .customer-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #ecfdf5;
+            color: #059669;
+        }
+        
+        .status-inactive {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-icon {
+            padding: 6px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            background: transparent;
+        }
+        
+        .btn-edit {
+            color: #2563eb;
+        }
+        
+        .btn-edit:hover {
+            background: #dbeafe;
+        }
+        
+        .btn-delete {
+            color: #dc2626;
+        }
+        
+        .btn-delete:hover {
+            background: #fee2e2;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #64748b;
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        /* Database Connection Status */
+        .db-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #ecfdf5;
+            color: #065f46;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .db-status.error {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .metrics-grid, .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .metrics-grid, .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .customer-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .customer-actions {
+                width: 100%;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .customer-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-home"></i>
+                <span>ServicePro</span>
+            </div>
+            <div class="user-info">
+                <select class="role-selector" id="roleSelector">
+                    <option value="technician">Technician View</option>
+                    <option value="admin">Admin View</option>
+                </select>
+                <div>
+                    <i class="fas fa-user"></i>
+                    <span id="userName">Mike Johnson</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav">
+            <button class="nav-button active" data-view="dashboard">Dashboard</button>
+            <button class="nav-button" data-view="customers">Customer Management</button>
+            <button class="nav-button" data-view="service" id="serviceNavButton">Active Service</button>
+        </div>
+
+        <!-- Database Connection Status -->
+        <div class="db-status" id="dbStatus">
+            <i class="fas fa-database"></i>
+            <span>Connected to SQL Express database</span>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboardView">
+            <!-- Alert Banner -->
+            <div class="alert-banner">
+                <div class="alert-content">
+                    <i class="fas fa-bell"></i>
+                    <div>
+                        <h3>Predictive Maintenance Alert</h3>
+                        <p>HVAC system at Mike Davis location showing 15% efficiency drop</p>
+                    </div>
+                </div>
+                <button class="alert-button">View Details</button>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="metrics-grid">
+                <div class="metric-card metric-blue">
+                    <div class="metric-info">
+                        <div class="metric-title">Today's Jobs</div>
+                        <div class="metric-value">3</div>
+                        <div class="metric-subtitle">Revenue: $570</div>
+                    </div>
+                    <i class="metric-icon fas fa-calendar"></i>
+                </div>
+                <div class="metric-card metric-green">
+                    <div class="metric-info">
+                        <div class="metric-title">Completed</div>
+                        <div class="metric-value">0</div>
+                        <div class="metric-subtitle">98% On-time</div>
+                    </div>
+                    <i class="metric-icon fas fa-check-circle"></i>
+                </div>
+                <div class="metric-card metric-orange">
+                    <div class="metric-info">
+                        <div class="metric-title">IoT Alerts</div>
+                        <div class="metric-value">7</div>
+                        <div class="metric-subtitle">3 Critical</div>
+                    </div>
+                    <i class="metric-icon fas fa-wifi"></i>
+                </div>
+                <div class="metric-card metric-purple">
+                    <div class="metric-info">
+                        <div class="metric-title">AI Insights</div>
+                        <div class="metric-value">12</div>
+                        <div class="metric-subtitle">Cost Savings</div>
+                    </div>
+                    <i class="metric-icon fas fa-brain"></i>
+                </div>
+            </div>
+
+            <!-- Info Grid -->
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Current Conditions</span>
+                    </div>
+                    <div>
+                        <p><strong>Temperature:</strong> 75°F</p>
+                        <p><strong>Condition:</strong> Sunny</p>
+                        <p><strong>Service Impact:</strong> <span style="color:#16a34a">Optimal</span></p>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <i class="fas fa-box"></i>
+                        <span>Inventory Status</span>
+                    </div>
+                    <div>
+                        <div class="completion-check">
+                            <i class="fas fa-exclamation-triangle" style="color:#ef4444"></i>
+                            <span>Pest Control Spray - Low</span>
+                        </div>
+                        <div class="completion-check">
+                            <i class="fas fa-exclamation-circle" style="color:#dc2626"></i>
+                            <span>Pool Chemicals - Critical</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <i class="fas fa-trending-up"></i>
+                        <span>Performance Metrics</span>
+                    </div>
+                    <div>
+                        <p><strong>First-time Fix Rate:</strong> <span style="color:#16a34a">94%</span></p>
+                        <p><strong>Avg Response Time:</strong> 12 min</p>
+                        <p><strong>Customer Rating:</strong> <span style="color:#ca8a04">4.8⭐</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Management View -->
+        <div id="customersView" class="hidden">
+            <div class="customer-management">
+                <div class="customer-header">
+                    <h2 class="customer-title">Customer Management</h2>
+                    <div class="customer-actions">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search customers..." id="customerSearch">
+                        </div>
+                        <button class="btn btn-primary" id="addCustomerBtn">
+                            <i class="fas fa-plus"></i>
+                            Add Customer
+                        </button>
+                    </div>
+                </div>
+
+                <table class="customer-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTableBody">
+                        <tr>
+                            <td>John Smith</td>
+                            <td>john.smith@example.com</td>
+                            <td>(555) 123-4567</td>
+                            <td>123 Oak St, Dallas, TX</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td class="action-buttons">
+                                <button class="btn-icon btn-edit" data-id="1">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon btn-delete" data-id="1">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Sarah Johnson</td>
+                            <td>sarahj@example.com</td>
+                            <td>(555) 987-6543</td>
+                            <td>456 Pine Ave, Fort Worth, TX</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td class="action-buttons">
+                                <button class="btn-icon btn-edit" data-id="2">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon btn-delete" data-id="2">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Mike Davis</td>
+                            <td>mike.davis@example.com</td>
+                            <td>(555) 456-7890</td>
+                            <td>789 Elm Court, Arlington, TX</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td class="action-buttons">
+                                <button class="btn-icon btn-edit" data-id="3">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon btn-delete" data-id="3">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Lisa Brown</td>
+                            <td>lisa.b@example.com</td>
+                            <td>(555) 234-5678</td>
+                            <td>321 Maple Ave, Houston, TX</td>
+                            <td><span class="status-badge status-inactive">Inactive</span></td>
+                            <td class="action-buttons">
+                                <button class="btn-icon btn-edit" data-id="4">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon btn-delete" data-id="4">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add/Edit Customer Modal -->
+        <div class="modal" id="customerModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modalTitle">Add Customer</h3>
+                    <button class="modal-close" id="modalClose">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="customerForm">
+                        <input type="hidden" id="customerId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="firstName">First Name</label>
+                                <input type="text" class="form-input" id="firstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="lastName">Last Name</label>
+                                <input type="text" class="form-input" id="lastName" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email</label>
+                            <input type="email" class="form-input" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="phone">Phone</label>
+                            <input type="tel" class="form-input" id="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="address">Address</label>
+                            <input type="text" class="form-input" id="address" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="city">City</label>
+                            <input type="text" class="form-input" id="city" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="state">State</label>
+                                <input type="text" class="form-input" id="state" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="zipCode">ZIP Code</label>
+                                <input type="text" class="form-input" id="zipCode" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="status">Status</label>
+                            <select class="form-input" id="status" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="modalCancel">Cancel</button>
+                    <button class="btn btn-primary" id="modalSave">Save Customer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const roleSelector = document.getElementById('roleSelector');
+        const userName = document.getElementById('userName');
+        const navButtons = document.querySelectorAll('.nav-button');
+        const dashboardView = document.getElementById('dashboardView');
+        const customersView = document.getElementById('customersView');
+        const dbStatus = document.getElementById('dbStatus');
+        const customerSearch = document.getElementById('customerSearch');
+        const addCustomerBtn = document.getElementById('addCustomerBtn');
+        const customersTableBody = document.getElementById('customersTableBody');
+        const customerModal = document.getElementById('customerModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalClose = document.getElementById('modalClose');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalSave = document.getElementById('modalSave');
+        const customerForm = document.getElementById('customerForm');
+        const customerId = document.getElementById('customerId');
+
+        // Sample customer data (simulating database records)
+        let customers = [
+            {
+                id: 1,
+                firstName: 'John',
+                lastName: 'Smith',
+                email: 'john.smith@example.com',
+                phone: '(555) 123-4567',
+                address: '123 Oak St',
+                city: 'Dallas',
+                state: 'TX',
+                zipCode: '75201',
+                status: 'Active'
+            },
+            {
+                id: 2,
+                firstName: 'Sarah',
+                lastName: 'Johnson',
+                email: 'sarahj@example.com',
+                phone: '(555) 987-6543',
+                address: '456 Pine Ave',
+                city: 'Fort Worth',
+                state: 'TX',
+                zipCode: '76102',
+                status: 'Active'
+            },
+            {
+                id: 3,
+                firstName: 'Mike',
+                lastName: 'Davis',
+                email: 'mike.davis@example.com',
+                phone: '(555) 456-7890',
+                address: '789 Elm Court',
+                city: 'Arlington',
+                state: 'TX',
+                zipCode: '76010',
+                status: 'Active'
+            },
+            {
+                id: 4,
+                firstName: 'Lisa',
+                lastName: 'Brown',
+                email: 'lisa.b@example.com',
+                phone: '(555) 234-5678',
+                address: '321 Maple Ave',
+                city: 'Houston',
+                state: 'TX',
+                zipCode: '77001',
+                status: 'Inactive'
+            }
+        ];
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Test database connection
+            testDatabaseConnection();
+            
+            // Set up event listeners
+            setupEventListeners();
+        });
+
+        // Test database connection (simulated)
+        function testDatabaseConnection() {
+            // Simulate database connection test
+            setTimeout(() => {
+                const connected = Math.random() > 0.2; // 80% chance of success
+                
+                if (connected) {
+                    dbStatus.innerHTML = '<i class="fas fa-database"></i> Connected to SQL Express database';
+                    dbStatus.className = 'db-status';
+                } else {
+                    dbStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Database connection failed. Using local data.';
+                    dbStatus.className = 'db-status error';
+                }
+            }, 1000);
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Role selection handler
+            roleSelector.addEventListener('change', function() {
+                if (this.value === 'admin') {
+                    userName.textContent = 'Admin User';
+                } else {
+                    userName.textContent = 'Mike Johnson';
+                }
+            });
+
+            // Navigation handler
+            navButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const view = this.getAttribute('data-view');
+                    
+                    // Set active navigation button
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show the selected view
+                    dashboardView.classList.add('hidden');
+                    customersView.classList.add('hidden');
+                    
+                    if (view === 'dashboard') {
+                        dashboardView.classList.remove('hidden');
+                    } else if (view === 'customers') {
+                        customersView.classList.remove('hidden');
+                    }
+                });
+            });
+
+            // Customer search handler
+            customerSearch.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                filterCustomers(searchTerm);
+            });
+
+            // Add customer button handler
+            addCustomerBtn.addEventListener('click', function() {
+                openCustomerModal();
+            });
+
+            // Edit and delete button handlers (delegated)
+            customersTableBody.addEventListener('click', function(e) {
+                if (e.target.closest('.btn-edit')) {
+                    const id = e.target.closest('.btn-edit').getAttribute('data-id');
+                    openCustomerModal(id);
+                } else if (e.target.closest('.btn-delete')) {
+                    const id = e.target.closest('.btn-delete').getAttribute('data-id');
+                    deleteCustomer(id);
+                }
+            });
+
+            // Modal handlers
+            modalClose.addEventListener('click', closeModal);
+            modalCancel.addEventListener('click', closeModal);
+            modalSave.addEventListener('click', saveCustomer);
+        }
+
+        // Filter customers based on search term
+        function filterCustomers(searchTerm) {
+            const rows = customersTableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const name = row.cells[0].textContent.toLowerCase();
+                const email = row.cells[1].textContent.toLowerCase();
+                const phone = row.cells[2].textContent.toLowerCase();
+                const address = row.cells[3].textContent.toLowerCase();
+                
+                if (name.includes(searchTerm) || email.includes(searchTerm) || 
+                    phone.includes(searchTerm) || address.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Open customer modal for adding or editing
+        function openCustomerModal(id = null) {
+            if (id) {
+                // Edit existing customer
+                const customer = customers.find(c => c.id == id);
+                if (customer) {
+                    modalTitle.textContent = 'Edit Customer';
+                    customerId.value = customer.id;
+                    document.getElementById('firstName').value = customer.firstName;
+                    document.getElementById('lastName').value = customer.lastName;
+                    document.getElementById('email').value = customer.email;
+                    document.getElementById('phone').value = customer.phone;
+                    document.getElementById('address').value = customer.address;
+                    document.getElementById('city').value = customer.city;
+                    document.getElementById('state').value = customer.state;
+                    document.getElementById('zipCode').value = customer.zipCode;
+                    document.getElementById('status').value = customer.status;
+                }
+            } else {
+                // Add new customer
+                modalTitle.textContent = 'Add Customer';
+                customerForm.reset();
+                customerId.value = '';
+            }
+            
+            customerModal.style.display = 'flex';
+        }
+
+        // Close modal
+        function closeModal() {
+            customerModal.style.display = 'none';
+        }
+
+        // Save customer (simulate database operation)
+        function saveCustomer() {
+            // Form validation
+            if (!customerForm.checkValidity()) {
+                customerForm.reportValidity();
+                return;
+            }
+            
+            const customerData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                zipCode: document.getElementById('zipCode').value,
+                status: document.getElementById('status').value
+            };
+            
+            const id = customerId.value;
+            
+            if (id) {
+                // Update existing customer
+                customerData.id = parseInt(id);
+                updateCustomer(customerData);
+            } else {
+                // Add new customer
+                customerData.id = customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1;
+                addCustomer(customerData);
+            }
+            
+            closeModal();
+        }
+
+        // Add new customer to database
+        function addCustomer(customerData) {
+            // Simulate API call to add customer to database
+            setTimeout(() => {
+                customers.push(customerData);
+                refreshCustomersTable();
+                showNotification('Customer added successfully!', 'success');
+            }, 500);
+        }
+
+        // Update existing customer in database
+        function updateCustomer(customerData) {
+            // Simulate API call to update customer in database
+            setTimeout(() => {
+                const index = customers.findIndex(c => c.id === customerData.id);
+                if (index !== -1) {
+                    customers[index] = customerData;
+                    refreshCustomersTable();
+                    showNotification('Customer updated successfully!', 'success');
+                }
+            }, 500);
+        }
+
+        // Delete customer from database
+        function deleteCustomer(id) {
+            if (confirm('Are you sure you want to delete this customer?')) {
+                // Simulate API call to delete customer from database
+                setTimeout(() => {
+                    customers = customers.filter(c => c.id != id);
+                    refreshCustomersTable();
+                    showNotification('Customer deleted successfully!', 'success');
+                }, 500);
+            }
+        }
+
+        // Refresh customers table with current data
+        function refreshCustomersTable() {
+            customersTableBody.innerHTML = '';
+            
+            customers.forEach(customer => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${customer.firstName} ${customer.lastName}</td>
+                    <td>${customer.email}</td>
+                    <td>${customer.phone}</td>
+                    <td>${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}</td>
+                    <td><span class="status-badge status-${customer.status.toLowerCase()}">${customer.status}</span></td>
+                    <td class="action-buttons">
+                        <button class="btn-icon btn-edit" data-id="${customer.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon btn-delete" data-id="${customer.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                customersTableBody.appendChild(row);
+            });
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.padding = '12px 20px';
+            notification.style.borderRadius = '6px';
+            notification.style.color = 'white';
+            notification.style.zIndex = '1000';
+            notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+            
+            if (type === 'success') {
+                notification.style.background = '#10b981';
+            } else {
+                notification.style.background = '#ef4444';
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
