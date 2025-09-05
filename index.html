@@ -506,6 +506,9 @@
         let allCustomers = [];
         let currentEditingId = null;
         
+        // API Base URL - Update this to your Netlify functions URL
+        const API_BASE = '/.netlify/functions';
+        
         // Show notification
         function showNotification(message, isSuccess = true) {
             notification.className = isSuccess ? 
@@ -599,82 +602,54 @@
             }
         });
         
-        // Database functions (simulated for frontend - would connect to backend in production)
+        // Database functions - these will call your Netlify functions
         async function saveCustomerToDatabase(customerData) {
-            // In a real implementation, this would call your Netlify function
-            // which would use: 
-            // const sql = neon(process.env.NETLIFY_DATABASE_URL);
-            // await sql`INSERT INTO customers (name, email, phone, company, status, notes) 
-            //           VALUES (${customerData.name}, ${customerData.email}, ${customerData.phone}, 
-            //                   ${customerData.company}, ${customerData.status}, ${customerData.notes})`;
-            
-            console.log('Saving customer to database:', customerData);
-            
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // For demo, add to our local array
-            const newCustomer = {
-                id: Date.now().toString(),
-                ...customerData,
-                created_at: new Date().toISOString()
-            };
-            
-            allCustomers.unshift(newCustomer);
-            
-            return { success: true, message: 'Customer saved', data: newCustomer };
+            try {
+                const response = await fetch(`${API_BASE}/create-customer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(customerData),
+                });
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error saving customer:', error);
+                return { success: false, message: error.message };
+            }
         }
         
         async function updateCustomerInDatabase(id, customerData) {
-            // In a real implementation, this would call your Netlify function
-            // which would use: 
-            // const sql = neon(process.env.NETLIFY_DATABASE_URL);
-            // await sql`UPDATE customers SET 
-            //           name = ${customerData.name}, 
-            //           email = ${customerData.email},
-            //           phone = ${customerData.phone},
-            //           company = ${customerData.company},
-            //           status = ${customerData.status},
-            //           notes = ${customerData.notes}
-            //           WHERE id = ${id}`;
-            
-            console.log('Updating customer in database:', id, customerData);
-            
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // For demo, update our local array
-            const index = allCustomers.findIndex(c => c.id === id);
-            if (index !== -1) {
-                allCustomers[index] = { ...allCustomers[index], ...customerData };
+            try {
+                const response = await fetch(`${API_BASE}/update-customer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id, ...customerData }),
+                });
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error updating customer:', error);
+                return { success: false, message: error.message };
             }
-            
-            return { success: true, message: 'Customer updated' };
         }
         
         async function loadCustomers() {
             setLoading(true);
             
             try {
-                // In a real implementation, this would call your Netlify function
-                // which would use: 
-                // const sql = neon(process.env.NETLIFY_DATABASE_URL);
-                // const customers = await sql`SELECT * FROM customers ORDER BY created_at DESC`;
+                const response = await fetch(`${API_BASE}/get-customers`);
+                const result = await response.json();
                 
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // For demo purposes, if we don't have any customers yet, use sample data
-                if (allCustomers.length === 0) {
-                    allCustomers = [
-                        { id: '1', name: 'Sarah Johnson', email: 'sarah@example.com', phone: '(555) 123-4567', company: 'Tech Corp', status: 'active', notes: 'Premium customer' },
-                        { id: '2', name: 'Michael Chen', email: 'michael@example.com', phone: '(555) 987-6543', company: 'Design Studio', status: 'active', notes: 'Interested in new products' },
-                        { id: '3', name: 'Emily Rodriguez', email: 'emily@example.com', phone: '(555) 456-7890', company: 'Marketing Agency', status: 'inactive', notes: 'Not responding to emails' },
-                        { id: '4', name: 'David Wilson', email: 'david@example.com', phone: '(555) 234-5678', company: 'Finance LLC', status: 'active', notes: 'Requested callback' }
-                    ];
+                if (result.success) {
+                    allCustomers = result.data;
+                    displayCustomers(allCustomers);
+                } else {
+                    showNotification('Error loading customers: ' + result.message, false);
                 }
-                
-                displayCustomers(allCustomers);
             } catch (error) {
                 console.error('Error loading customers:', error);
                 showNotification('Error loading customers', false);
@@ -745,16 +720,22 @@
             }
             
             try {
-                // In a real implementation, this would call your Netlify function
-                // which would use: 
-                // const sql = neon(process.env.NETLIFY_DATABASE_URL);
-                // await sql`DELETE FROM customers WHERE id = ${customerId}`;
+                const response = await fetch(`${API_BASE}/delete-customer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: customerId }),
+                });
                 
-                // For demo, remove from our local array
-                allCustomers = allCustomers.filter(c => c.id !== customerId);
+                const result = await response.json();
                 
-                showNotification('Customer deleted successfully');
-                loadCustomers(); // Refresh the customer list
+                if (result.success) {
+                    showNotification('Customer deleted successfully');
+                    loadCustomers(); // Refresh the customer list
+                } else {
+                    showNotification('Error deleting customer: ' + result.message, false);
+                }
             } catch (error) {
                 console.error('Error deleting customer:', error);
                 showNotification('Error deleting customer', false);
@@ -780,11 +761,6 @@
         
         // Load customers when page loads
         document.addEventListener('DOMContentLoaded', loadCustomers);
-        
-        // Simulated database connection info
-        console.log('This application would connect to:');
-        console.log('Neon DB: lucky-mud-32246260');
-        console.log('Using environment variables: NETLIFY_DATABASE_URL');
     </script>
 </body>
 </html>
