@@ -397,7 +397,7 @@
             <div class="header">
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search customers...">
+                    <input type="text" placeholder="Search customers..." id="searchInput">
                 </div>
                 <div class="user-actions">
                     <i class="fas fa-bell"></i>
@@ -438,11 +438,12 @@
     <div class="modal" id="addCustomerModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Add New Customer</h3>
+                <h3 id="modalTitle">Add New Customer</h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
                 <form id="customerForm">
+                    <input type="hidden" id="customerId">
                     <div class="form-group">
                         <label for="name">Full Name *</label>
                         <input type="text" id="name" required>
@@ -472,7 +473,7 @@
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-cancel" id="cancelBtn">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Customer</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">Save Customer</button>
                     </div>
                 </form>
             </div>
@@ -497,6 +498,13 @@
         const notificationMessage = document.getElementById('notificationMessage');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const customersContainer = document.getElementById('customersContainer');
+        const searchInput = document.getElementById('searchInput');
+        const modalTitle = document.getElementById('modalTitle');
+        const customerIdField = document.getElementById('customerId');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        let allCustomers = [];
+        let currentEditingId = null;
         
         // Show notification
         function showNotification(message, isSuccess = true) {
@@ -520,16 +528,24 @@
             }
         }
         
-        // Open modal
-        addCustomerBtn.addEventListener('click', () => {
+        // Open modal for adding or editing
+        function openModal(isEditing = false) {
             modal.style.display = 'flex';
-            customerForm.reset();
-            document.querySelector('.modal-header h3').textContent = 'Add New Customer';
-        });
+            modalTitle.textContent = isEditing ? 'Edit Customer' : 'Add New Customer';
+            submitBtn.textContent = isEditing ? 'Update Customer' : 'Save Customer';
+            
+            if (!isEditing) {
+                customerForm.reset();
+                customerIdField.value = '';
+            }
+        }
+        
+        addCustomerBtn.addEventListener('click', () => openModal(false));
         
         // Close modal
         const closeModal = () => {
             modal.style.display = 'none';
+            currentEditingId = null;
         };
         
         cancelBtn.addEventListener('click', closeModal);
@@ -555,13 +571,22 @@
                 notes: document.getElementById('notes').value
             };
             
+            const id = customerIdField.value;
+            
             try {
-                // In a real implementation, this would call a serverless function
-                // that interacts with the Neon database
-                const response = await saveCustomerToDatabase(customerData);
+                setLoading(true);
+                let response;
+                
+                if (id) {
+                    // Update existing customer
+                    response = await updateCustomerInDatabase(id, customerData);
+                } else {
+                    // Create new customer
+                    response = await saveCustomerToDatabase(customerData);
+                }
                 
                 if (response.success) {
-                    showNotification('Customer saved successfully!');
+                    showNotification(`Customer ${id ? 'updated' : 'saved'} successfully!`);
                     closeModal();
                     loadCustomers(); // Refresh the customer list
                 } else {
@@ -569,46 +594,87 @@
                 }
             } catch (error) {
                 showNotification('Error saving customer: ' + error.message, false);
+            } finally {
+                setLoading(false);
             }
         });
         
-        // Simulated database functions
+        // Database functions (simulated for frontend - would connect to backend in production)
         async function saveCustomerToDatabase(customerData) {
-            // This is a simulation - in a real app, this would call your Netlify function
-            console.log('Saving customer to database:', customerData);
-            
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // In a real implementation, this would use:
+            // In a real implementation, this would call your Netlify function
+            // which would use: 
             // const sql = neon(process.env.NETLIFY_DATABASE_URL);
             // await sql`INSERT INTO customers (name, email, phone, company, status, notes) 
             //           VALUES (${customerData.name}, ${customerData.email}, ${customerData.phone}, 
             //                   ${customerData.company}, ${customerData.status}, ${customerData.notes})`;
             
-            return { success: true, message: 'Customer saved' };
+            console.log('Saving customer to database:', customerData);
+            
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // For demo, add to our local array
+            const newCustomer = {
+                id: Date.now().toString(),
+                ...customerData,
+                created_at: new Date().toISOString()
+            };
+            
+            allCustomers.unshift(newCustomer);
+            
+            return { success: true, message: 'Customer saved', data: newCustomer };
+        }
+        
+        async function updateCustomerInDatabase(id, customerData) {
+            // In a real implementation, this would call your Netlify function
+            // which would use: 
+            // const sql = neon(process.env.NETLIFY_DATABASE_URL);
+            // await sql`UPDATE customers SET 
+            //           name = ${customerData.name}, 
+            //           email = ${customerData.email},
+            //           phone = ${customerData.phone},
+            //           company = ${customerData.company},
+            //           status = ${customerData.status},
+            //           notes = ${customerData.notes}
+            //           WHERE id = ${id}`;
+            
+            console.log('Updating customer in database:', id, customerData);
+            
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // For demo, update our local array
+            const index = allCustomers.findIndex(c => c.id === id);
+            if (index !== -1) {
+                allCustomers[index] = { ...allCustomers[index], ...customerData };
+            }
+            
+            return { success: true, message: 'Customer updated' };
         }
         
         async function loadCustomers() {
             setLoading(true);
             
             try {
-                // This is a simulation - in a real app, this would call your Netlify function
+                // In a real implementation, this would call your Netlify function
+                // which would use: 
                 // const sql = neon(process.env.NETLIFY_DATABASE_URL);
                 // const customers = await sql`SELECT * FROM customers ORDER BY created_at DESC`;
                 
                 // Simulate API call delay
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                // For demo purposes, we'll use sample data
-                const customers = [
-                    { id: 1, name: 'Sarah Johnson', email: 'sarah@example.com', phone: '(555) 123-4567', status: 'active' },
-                    { id: 2, name: 'Michael Chen', email: 'michael@example.com', phone: '(555) 987-6543', status: 'active' },
-                    { id: 3, name: 'Emily Rodriguez', email: 'emily@example.com', phone: '(555) 456-7890', status: 'inactive' },
-                    { id: 4, name: 'David Wilson', email: 'david@example.com', phone: '(555) 234-5678', status: 'active' }
-                ];
+                // For demo purposes, if we don't have any customers yet, use sample data
+                if (allCustomers.length === 0) {
+                    allCustomers = [
+                        { id: '1', name: 'Sarah Johnson', email: 'sarah@example.com', phone: '(555) 123-4567', company: 'Tech Corp', status: 'active', notes: 'Premium customer' },
+                        { id: '2', name: 'Michael Chen', email: 'michael@example.com', phone: '(555) 987-6543', company: 'Design Studio', status: 'active', notes: 'Interested in new products' },
+                        { id: '3', name: 'Emily Rodriguez', email: 'emily@example.com', phone: '(555) 456-7890', company: 'Marketing Agency', status: 'inactive', notes: 'Not responding to emails' },
+                        { id: '4', name: 'David Wilson', email: 'david@example.com', phone: '(555) 234-5678', company: 'Finance LLC', status: 'active', notes: 'Requested callback' }
+                    ];
+                }
                 
-                displayCustomers(customers);
+                displayCustomers(allCustomers);
             } catch (error) {
                 console.error('Error loading customers:', error);
                 showNotification('Error loading customers', false);
@@ -621,7 +687,7 @@
             customersContainer.innerHTML = '';
             
             if (customers.length === 0) {
-                customersContainer.innerHTML = '<div class="customer-row"><div colspan="5" style="text-align: center;">No customers found</div></div>';
+                customersContainer.innerHTML = '<div class="customer-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5;">No customers found</div></div>';
                 return;
             }
             
@@ -658,15 +724,19 @@
         }
         
         function editCustomer(customerId) {
-            // In a real implementation, this would fetch the customer data
-            // and populate the form for editing
-            modal.style.display = 'flex';
-            document.querySelector('.modal-header h3').textContent = 'Edit Customer';
+            const customer = allCustomers.find(c => c.id === customerId);
+            if (!customer) return;
             
-            // For demo purposes, we'll just prefill with sample data
-            document.getElementById('name').value = 'Sample Customer';
-            document.getElementById('email').value = 'sample@example.com';
-            document.getElementById('status').value = 'active';
+            // Populate the form with customer data
+            document.getElementById('name').value = customer.name;
+            document.getElementById('email').value = customer.email;
+            document.getElementById('phone').value = customer.phone || '';
+            document.getElementById('company').value = customer.company || '';
+            document.getElementById('status').value = customer.status;
+            document.getElementById('notes').value = customer.notes || '';
+            customerIdField.value = customerId;
+            
+            openModal(true);
         }
         
         async function deleteCustomer(customerId) {
@@ -675,9 +745,13 @@
             }
             
             try {
-                // This is a simulation - in a real app, this would call your Netlify function
+                // In a real implementation, this would call your Netlify function
+                // which would use: 
                 // const sql = neon(process.env.NETLIFY_DATABASE_URL);
                 // await sql`DELETE FROM customers WHERE id = ${customerId}`;
+                
+                // For demo, remove from our local array
+                allCustomers = allCustomers.filter(c => c.id !== customerId);
                 
                 showNotification('Customer deleted successfully');
                 loadCustomers(); // Refresh the customer list
@@ -687,11 +761,28 @@
             }
         }
         
+        // Search functionality
+        searchInput.addEventListener('input', () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            if (searchTerm) {
+                const filteredCustomers = allCustomers.filter(customer => 
+                    customer.name.toLowerCase().includes(searchTerm) ||
+                    customer.email.toLowerCase().includes(searchTerm) ||
+                    (customer.company && customer.company.toLowerCase().includes(searchTerm))
+                );
+                
+                displayCustomers(filteredCustomers);
+            } else {
+                displayCustomers(allCustomers);
+            }
+        });
+        
         // Load customers when page loads
         document.addEventListener('DOMContentLoaded', loadCustomers);
         
         // Simulated database connection info
-        console.log('This application connects to:');
+        console.log('This application would connect to:');
         console.log('Neon DB: lucky-mud-32246260');
         console.log('Using environment variables: NETLIFY_DATABASE_URL');
     </script>
