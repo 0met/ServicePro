@@ -502,10 +502,10 @@
                     <h2>Analytics</h2>
                 </div>
                 <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 20px;">
-                    <h3>Customer Stats</h3>
-                    <div id="analyticsCustomerStats"></div>
-                    <h3 style="margin-top:30px;">Ticket Stats</h3>
-                    <div id="analyticsTicketStats"></div>
+                    <h3>Customer Status</h3>
+                    <canvas id="customerStatusChart" width="400" height="200"></canvas>
+                    <h3 style="margin-top:30px;">Ticket Status</h3>
+                    <canvas id="ticketStatusChart" width="400" height="200"></canvas>
                 </div>
             </div>
 
@@ -675,6 +675,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Add Chart.js CDN before your main script -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Example: Replace with Stack Auth's actual SDK URL -->
     <script src="https://cdn.stack-auth.com/sdk/latest/stack-auth.min.js"></script>
@@ -1172,7 +1175,8 @@
             });
         }
 
-        // --- Analytics Logic ---
+        let customerStatusChart, ticketStatusChart;
+
         async function updateAnalytics() {
             // Customers
             let customers = [];
@@ -1181,11 +1185,6 @@
             } catch {}
             let activeCount = customers.filter(c => c.status === 'active').length;
             let inactiveCount = customers.filter(c => c.status === 'inactive').length;
-            document.getElementById('analyticsCustomerStats').innerHTML = `
-                <div>Active: <strong>${activeCount}</strong></div>
-                <div>Inactive: <strong>${inactiveCount}</strong></div>
-                <div>Total: <strong>${customers.length}</strong></div>
-            `;
 
             // Tickets
             let tickets = [];
@@ -1194,11 +1193,44 @@
             } catch {}
             let openCount = tickets.filter(t => t.status === 'open').length;
             let closedCount = tickets.filter(t => t.status === 'closed').length;
-            document.getElementById('analyticsTicketStats').innerHTML = `
-                <div>Open: <strong>${openCount}</strong></div>
-                <div>Closed: <strong>${closedCount}</strong></div>
-                <div>Total: <strong>${tickets.length}</strong></div>
-            `;
+
+            // Customer Status Chart
+            const customerCtx = document.getElementById('customerStatusChart').getContext('2d');
+            if (customerStatusChart) customerStatusChart.destroy();
+            customerStatusChart = new Chart(customerCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Active', 'Inactive'],
+                    datasets: [{
+                        data: [activeCount, inactiveCount],
+                        backgroundColor: ['#2D9D78', '#FF5D5D'],
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Ticket Status Chart
+            const ticketCtx = document.getElementById('ticketStatusChart').getContext('2d');
+            if (ticketStatusChart) ticketStatusChart.destroy();
+            ticketStatusChart = new Chart(ticketCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Open', 'Closed'],
+                    datasets: [{
+                        data: [openCount, closedCount],
+                        backgroundColor: ['#2D9D78', '#FF5D5D'],
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
         }
 
         // --- Update dashboard and analytics on load and after changes ---
