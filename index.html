@@ -924,16 +924,37 @@
             return `${API_CONFIG.baseUrl}${path}`;
         }
 
-        // Fetch all customers
+        // --- Sample Data for Customers ---
+        const SAMPLE_CUSTOMERS = [
+            { id: 1, name: 'Sarah Johnson', email: 'sarah@example.com', phone: '(555) 123-4567', status: 'active', company: 'Acme Inc.', notes: 'VIP customer' },
+            { id: 2, name: 'Michael Chen', email: 'michael@example.com', phone: '(555) 987-6543', status: 'active', company: 'Beta LLC', notes: '' },
+            { id: 3, name: 'Emily Rodriguez', email: 'emily@example.com', phone: '(555) 456-7890', status: 'inactive', company: 'Gamma Corp', notes: 'Requested follow-up' },
+            { id: 4, name: 'David Wilson', email: 'david@example.com', phone: '(555) 234-5678', status: 'active', company: 'Delta Ltd', notes: '' }
+        ];
+
+        // --- Fetch Customers (with fallback to sample data) ---
         async function fetchCustomers(filter = '') {
-            let url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows`);
-            if (filter) {
-                // Neon Data API supports filtering via query params, but you may need to filter client-side
-                // For advanced filtering, see Neon docs
+            let customers = [];
+            try {
+                // Try Neon API
+                let url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows`);
+                const result = await apiFetch(url, { method: 'GET' });
+                customers = result.rows || [];
+            } catch (e) {
+                // Fallback to sample data
+                customers = SAMPLE_CUSTOMERS;
             }
-            const result = await apiFetch(url, { method: 'GET' });
-            // Neon returns { rows: [...] }
-            return result.rows || [];
+            // Filter if needed
+            if (filter) {
+                const f = filter.toLowerCase();
+                customers = customers.filter(c =>
+                    c.name.toLowerCase().includes(f) ||
+                    c.email.toLowerCase().includes(f) ||
+                    (c.phone && c.phone.toLowerCase().includes(f)) ||
+                    (c.company && c.company.toLowerCase().includes(f))
+                );
+            }
+            return customers;
         }
 
         // Add a customer
