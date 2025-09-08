@@ -551,6 +551,8 @@
         <span id="notificationMessage"></span>
     </div>
 
+    <!-- Example: Replace with Stack Auth's actual SDK URL -->
+    <script src="https://cdn.stack-auth.com/sdk/latest/stack-auth.min.js"></script>
     <script>
         // --- API Config ---
         function getApiConfig() {
@@ -724,6 +726,47 @@
             apiSettingsModal.style.display = 'none';
             showNotification('API configuration updated!', true);
             loadCustomers(searchInput.value);
+        });
+
+        // --- Stack Auth Public Config ---
+        const STACK_PROJECT_ID = '670cb40f-90d2-478e-9a4a-7829c1d91873';
+        const STACK_PUBLISHABLE_CLIENT_KEY = 'pck_7700yg0gjvvtqwm6678f3becyct8apcqjv59n0maez6p8';
+
+        // --- Stack Auth Login Flow ---
+        const loginBtn = document.getElementById('loginBtn');
+        const loggedInUser = document.getElementById('loggedInUser');
+
+        // Replace with actual Stack Auth SDK usage
+        loginBtn.addEventListener('click', async () => {
+            // Show a simple prompt for email/password (replace with your UI)
+            const email = prompt('Enter your email:');
+            const password = prompt('Enter your password:');
+            if (!email || !password) return;
+
+            try {
+                // Example: Replace with Stack Auth SDK/API call
+                const stackAuth = new window.StackAuth({
+                    projectId: STACK_PROJECT_ID,
+                    clientKey: STACK_PUBLISHABLE_CLIENT_KEY
+                });
+
+                // Authenticate user and get JWT token
+                const user = await stackAuth.loginWithEmail(email, password);
+                const jwtToken = user.token; // <-- This is your JWT!
+
+                // Save JWT token in API config
+                setApiConfig({
+                    ...getApiConfig(),
+                    apiKey: jwtToken
+                });
+                API_CONFIG = getApiConfig();
+
+                showNotification('Login successful!', true);
+                loggedInUser.textContent = `Logged in as ${user.display_name || email}`;
+                loadCustomers(searchInput.value);
+            } catch (err) {
+                showNotification('Login failed: ' + err.message, false);
+            }
         });
 
         // --- API CRUD Functions for Neon Data API ---
