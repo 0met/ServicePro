@@ -436,7 +436,6 @@
                 <li class="menu-item" data-tab="tickets"><i class="fas fa-ticket-alt"></i> Tickets</li>
                 <li class="menu-item" data-tab="analytics"><i class="fas fa-chart-bar"></i> Analytics</li>
                 <li class="menu-item" data-tab="settings"><i class="fas fa-cog"></i> Settings</li>
-                <li class="menu-item" id="apiSettingsMenuItem"><i class="fas fa-link"></i> API Settings</li>
             </ul>
         </div>
         
@@ -578,54 +577,15 @@
         </div>
     </div>
 
-    <!-- API Settings Modal -->
-    <div class="modal" id="apiSettingsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Neon DB Configuration</h3>
-                <span class="close" id="closeApiSettings">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="apiSettingsForm">
-                    <div class="form-group">
-                        <label for="neonEndpoint">Neon DB REST Endpoint</label>
-                        <input type="text" id="neonEndpoint" required 
-                               value="https://ep-royal-fire-aemrirs1.apirest.c-2.us-east-2.aws.neon.tech/neondb/rest/v1">
-                    </div>
-                    <div class="form-group">
-                        <label for="neonApiKey">Neon API Key</label>
-                        <input type="password" id="neonApiKey" required 
-                               value="npg_CS42JdHaVXKw">
-                    </div>
-                    <div class="form-group">
-                        <label for="customersTable">Customers Table Name</label>
-                        <input type="text" id="customersTable" value="customers">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-cancel" id="cancelApiSettings">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Configuration</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Notification -->
     <div class="notification" id="notification">
         <i class="fas fa-check-circle" id="notificationIcon"></i>
         <span id="notificationMessage"></span>
     </div>
 
-    <!-- Add Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
-        // --- Neon DB Integration ---
-        const NEON_CONFIG = {
-            endpoint: localStorage.getItem('neonEndpoint') || 'https://ep-royal-fire-aemrirs1.apirest.c-2.us-east-2.aws.neon.tech/neondb/rest/v1',
-            apiKey: localStorage.getItem('neonApiKey') || 'npg_CS42JdHaVXKw',
-            customersTable: localStorage.getItem('customersTable') || 'customers'
-        };
+        // --- API Config ---
+        const API_BASE_URL = 'http://localhost:3001/api';
 
         // Show notification
         function showNotification(message, isSuccess = true) {
@@ -651,26 +611,28 @@
             
             if (isConnected) {
                 indicator.className = 'status-indicator status-connected';
-                statusText.textContent = message || 'Connected to Neon DB';
+                statusText.textContent = message || 'Connected to Backend API';
             } else {
                 indicator.className = 'status-indicator status-disconnected';
-                statusText.textContent = message || 'Disconnected from Neon DB';
+                statusText.textContent = message || 'Disconnected from Backend API';
             }
         }
 
-        // Make API requests to Neon DB
-        async function neonApiRequest(path, options = {}) {
-            const url = `${NEON_CONFIG.endpoint}${path}`;
+        // Make API requests to backend
+        async function apiRequest(path, options = {}) {
+            const url = `${API_BASE_URL}${path}`;
             
             const defaultOptions = {
                 headers: {
-                    'Authorization': `Bearer ${NEON_CONFIG.apiKey}`,
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
                 }
             };
             
             const mergedOptions = { ...defaultOptions, ...options };
+            
+            if (mergedOptions.body) {
+                mergedOptions.body = JSON.stringify(mergedOptions.body);
+            }
             
             try {
                 const response = await fetch(url, mergedOptions);
@@ -681,30 +643,30 @@
                 
                 return await response.json();
             } catch (error) {
-                console.error('Neon API request failed:', error);
+                console.error('API request failed:', error);
                 throw error;
             }
         }
 
-        // Test Neon DB connection
-        async function testNeonConnection() {
+        // Test API connection
+        async function testApiConnection() {
             try {
                 updateApiStatus(false, 'Testing connection...');
                 
-                // Try to get a list of tables to test the connection
-                const result = await neonApiRequest('/');
+                // Try to get customers to test the connection
+                await apiRequest('/customers');
                 
-                updateApiStatus(true, 'Connected to Neon DB');
+                updateApiStatus(true, 'Connected to Backend API');
                 return true;
             } catch (error) {
                 updateApiStatus(false, 'Connection failed: ' + error.message);
-                showNotification('Neon DB connection failed: ' + error.message, false);
+                showNotification('Backend API connection failed. Make sure your server is running on port 3001.', false);
                 return false;
             }
         }
 
-        // Load customers from Neon DB
-        async function loadCustomersFromNeon() {
+        // Load customers from backend API
+        async function loadCustomersFromAPI() {
             const loadingSpinner = document.getElementById('loadingSpinner');
             const customersContainer = document.getElementById('customersContainer');
             
@@ -712,17 +674,17 @@
             customersContainer.innerHTML = '';
             
             try {
-                // Get customers from Neon DB
-                const result = await neonApiRequest(`/tables/${NEON_CONFIG.customersTable}/rows`);
+                // Get customers from backend API
+                const customers = await apiRequest('/customers');
                 
-                if (result.rows && result.rows.length > 0) {
-                    displayCustomers(result.rows);
-                    document.getElementById('dashboardCustomerCount').textContent = result.rows.length;
+                if (customers && customers.length > 0) {
+                    displayCustomers(customers);
+                    document.getElementById('dashboardCustomerCount').textContent = customers.length;
                 } else {
-                    customersContainer.innerHTML = '<div class="customer-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5;">No customers found in Neon DB</div></div>';
+                    customersContainer.innerHTML = '<div class="customer-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5;">No customers found</div></div>';
                 }
                 
-                showNotification('Customers loaded successfully from Neon DB');
+                showNotification('Customers loaded successfully');
             } catch (error) {
                 customersContainer.innerHTML = '<div class="customer-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5; color: var(--accent);">Error loading customers: ' + error.message + '</div></div>';
                 showNotification('Error loading customers: ' + error.message, false);
@@ -731,15 +693,15 @@
             }
         }
 
-        // Save customer to Neon DB
-        async function saveCustomerToNeon(customerData) {
+        // Save customer to backend API
+        async function saveCustomerToAPI(customerData) {
             try {
-                const result = await neonApiRequest(`/tables/${NEON_CONFIG.customersTable}/rows`, {
+                const result = await apiRequest('/customers', {
                     method: 'POST',
-                    body: JSON.stringify(customerData)
+                    body: customerData
                 });
                 
-                showNotification('Customer saved successfully to Neon DB');
+                showNotification('Customer saved successfully');
                 return result;
             } catch (error) {
                 showNotification('Error saving customer: ' + error.message, false);
@@ -747,15 +709,15 @@
             }
         }
 
-        // Update customer in Neon DB
-        async function updateCustomerInNeon(id, customerData) {
+        // Update customer in backend API
+        async function updateCustomerInAPI(id, customerData) {
             try {
-                const result = await neonApiRequest(`/tables/${NEON_CONFIG.customersTable}/rows/${id}`, {
-                    method: 'PATCH',
-                    body: JSON.stringify(customerData)
+                const result = await apiRequest(`/customers/${id}`, {
+                    method: 'PUT',
+                    body: customerData
                 });
                 
-                showNotification('Customer updated successfully in Neon DB');
+                showNotification('Customer updated successfully');
                 return result;
             } catch (error) {
                 showNotification('Error updating customer: ' + error.message, false);
@@ -763,14 +725,14 @@
             }
         }
 
-        // Delete customer from Neon DB
-        async function deleteCustomerFromNeon(id) {
+        // Delete customer from backend API
+        async function deleteCustomerFromAPI(id) {
             try {
-                const result = await neonApiRequest(`/tables/${NEON_CONFIG.customersTable}/rows/${id}`, {
+                const result = await apiRequest(`/customers/${id}`, {
                     method: 'DELETE'
                 });
                 
-                showNotification('Customer deleted successfully from Neon DB');
+                showNotification('Customer deleted successfully');
                 return result;
             } catch (error) {
                 showNotification('Error deleting customer: ' + error.message, false);
@@ -820,26 +782,35 @@
         // Edit customer
         async function editCustomer(id) {
             try {
-                // In a real app, you would fetch the customer data from the DB
-                // For this demo, we'll just show the modal with the ID
-                document.getElementById('customerId').value = id;
+                // Fetch the customer data from the API
+                const customer = await apiRequest(`/customers/${id}`);
+                
+                // Fill the form with customer data
+                document.getElementById('customerId').value = customer.id;
+                document.getElementById('name').value = customer.name || '';
+                document.getElementById('email').value = customer.email || '';
+                document.getElementById('phone').value = customer.phone || '';
+                document.getElementById('company').value = customer.company || '';
+                document.getElementById('status').value = customer.status || 'active';
+                document.getElementById('notes').value = customer.notes || '';
+                
+                // Update UI
                 document.getElementById('modalTitle').textContent = 'Edit Customer';
                 document.getElementById('submitBtn').textContent = 'Update Customer';
                 
                 // Show the modal
                 document.getElementById('addCustomerModal').style.display = 'flex';
                 
-                showNotification('Edit customer with ID: ' + id);
             } catch (error) {
-                showNotification('Error preparing customer edit: ' + error.message, false);
+                showNotification('Error loading customer data: ' + error.message, false);
             }
         }
 
         // Delete customer
         async function deleteCustomer(id) {
             try {
-                await deleteCustomerFromNeon(id);
-                loadCustomersFromNeon(); // Reload the customer list
+                await deleteCustomerFromAPI(id);
+                loadCustomersFromAPI(); // Reload the customer list
             } catch (error) {
                 console.error('Error deleting customer:', error);
             }
@@ -883,7 +854,7 @@
                         
                         // Load data if it's the customers tab
                         if (tabName === 'customers') {
-                            loadCustomersFromNeon();
+                            loadCustomersFromAPI();
                         }
                     }
                 });
@@ -937,71 +908,25 @@
                 try {
                     if (customerId) {
                         // Update existing customer
-                        await updateCustomerInNeon(customerId, customerData);
+                        await updateCustomerInAPI(customerId, customerData);
                     } else {
                         // Add new customer
-                        await saveCustomerToNeon(customerData);
+                        await saveCustomerToAPI(customerData);
                     }
                     
                     closeModal();
-                    loadCustomersFromNeon(); // Reload the customer list
+                    loadCustomersFromAPI(); // Reload the customer list
                 } catch (error) {
                     console.error('Error saving customer:', error);
                 }
             });
             
-            // Set up API settings modal
-            const apiSettingsModal = document.getElementById('apiSettingsModal');
-            const apiSettingsMenuItem = document.getElementById('apiSettingsMenuItem');
-            const closeApiSettings = document.getElementById('closeApiSettings');
-            const cancelApiSettings = document.getElementById('cancelApiSettings');
-            const apiSettingsForm = document.getElementById('apiSettingsForm');
-            const neonEndpointInput = document.getElementById('neonEndpoint');
-            const neonApiKeyInput = document.getElementById('neonApiKey');
-            const customersTableInput = document.getElementById('customersTable');
-            
-            apiSettingsMenuItem.addEventListener('click', function() {
-                // Pre-fill the form with current values
-                neonEndpointInput.value = NEON_CONFIG.endpoint;
-                neonApiKeyInput.value = NEON_CONFIG.apiKey;
-                customersTableInput.value = NEON_CONFIG.customersTable;
-                
-                apiSettingsModal.style.display = 'flex';
-            });
-            
-            closeApiSettings.addEventListener('click', function() {
-                apiSettingsModal.style.display = 'none';
-            });
-            
-            cancelApiSettings.addEventListener('click', function() {
-                apiSettingsModal.style.display = 'none';
-            });
-            
-            apiSettingsForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Save the new configuration
-                NEON_CONFIG.endpoint = neonEndpointInput.value;
-                NEON_CONFIG.apiKey = neonApiKeyInput.value;
-                NEON_CONFIG.customersTable = customersTableInput.value;
-                
-                // Save to localStorage
-                localStorage.setItem('neonEndpoint', NEON_CONFIG.endpoint);
-                localStorage.setItem('neonApiKey', NEON_CONFIG.apiKey);
-                localStorage.setItem('customersTable', NEON_CONFIG.customersTable);
-                
-                // Test the connection
-                testNeonConnection();
-                
-                // Close the modal
-                apiSettingsModal.style.display = 'none';
-                
-                showNotification('API configuration saved successfully');
-            });
-            
             // Initialize the app
             showTab('dashboard');
-            testNeonConnection();
+            testApiConnection();
+            
+            // Load customers on initial load
+            loadCustomersFromAPI();
         });
     </script>
 </body>
