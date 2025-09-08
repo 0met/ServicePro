@@ -397,6 +397,30 @@
                 display: none;
             }
         }
+
+        /* API Status Indicator */
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-right: 20px;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-connected {
+            background-color: var(--secondary);
+        }
+        
+        .status-disconnected {
+            background-color: var(--accent);
+        }
     </style>
 </head>
 <body>
@@ -407,11 +431,12 @@
                 <h1><i class="fas fa-headset"></i> Service<span>Pro</span></h1>
             </div>
             <ul class="menu">
-                <li class="menu-item active"><i class="fas fa-home"></i> Dashboard</li>
-                <li class="menu-item"><i class="fas fa-users"></i> Customers</li>
-                <li class="menu-item"><i class="fas fa-ticket-alt"></i> Tickets</li>
-                <li class="menu-item"><i class="fas fa-chart-bar"></i> Analytics</li>
-                <li class="menu-item"><i class="fas fa-cog"></i> Settings</li>
+                <li class="menu-item active" data-tab="dashboard"><i class="fas fa-home"></i> Dashboard</li>
+                <li class="menu-item" data-tab="customers"><i class="fas fa-users"></i> Customers</li>
+                <li class="menu-item" data-tab="tickets"><i class="fas fa-ticket-alt"></i> Tickets</li>
+                <li class="menu-item" data-tab="analytics"><i class="fas fa-chart-bar"></i> Analytics</li>
+                <li class="menu-item" data-tab="settings"><i class="fas fa-cog"></i> Settings</li>
+                <li class="menu-item" id="apiSettingsMenuItem"><i class="fas fa-link"></i> API Settings</li>
             </ul>
         </div>
         
@@ -424,6 +449,10 @@
                     <input type="text" placeholder="Search customers..." id="searchInput">
                 </div>
                 <div class="user-actions">
+                    <div class="api-status">
+                        <span class="status-indicator" id="apiStatusIndicator"></span>
+                        <span id="apiStatusText">Checking connection...</span>
+                    </div>
                     <i class="fas fa-bell"></i>
                     <div class="user-profile">
                         <div class="avatar">JD</div>
@@ -432,9 +461,8 @@
                 </div>
             </div>
 
-            <!-- Tab Content Areas -->
+            <!-- Dashboard Content -->
             <div class="content" id="dashboardContent">
-                <!-- Dashboard Quick Overview -->
                 <div class="dashboard-header">
                     <h2>Dashboard Overview</h2>
                 </div>
@@ -458,6 +486,7 @@
                 </div>
             </div>
 
+            <!-- Customers Content -->
             <div class="content" id="customersContent" style="display:none;">
                 <div class="dashboard-header">
                     <h2>Customer Management</h2>
@@ -479,43 +508,26 @@
                 <button class="fab" id="addCustomerFab"><i class="fas fa-plus"></i></button>
             </div>
 
+            <!-- Other content areas -->
             <div class="content" id="ticketsContent" style="display:none;">
                 <div class="dashboard-header">
                     <h2>Tickets</h2>
-                    <button class="btn btn-primary" id="addTicketBtn"><i class="fas fa-plus"></i> Add Ticket</button>
                 </div>
-                <div class="customer-list">
-                    <div class="list-header">
-                        <div>Title</div>
-                        <div>Description</div>
-                        <div>Status</div>
-                        <div>Actions</div>
-                    </div>
-                    <div id="ticketsContainer">
-                        <div class="spinner" id="loadingTicketSpinner"></div>
-                    </div>
-                </div>
+                <p style="text-align: center; padding: 20px; color: var(--gray);">Tickets functionality coming soon...</p>
             </div>
 
             <div class="content" id="analyticsContent" style="display:none;">
                 <div class="dashboard-header">
                     <h2>Analytics</h2>
                 </div>
-                <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 20px;">
-                    <h3>Customer Status</h3>
-                    <canvas id="customerStatusChart" width="400" height="200"></canvas>
-                    <h3 style="margin-top:30px;">Ticket Status</h3>
-                    <canvas id="ticketStatusChart" width="400" height="200"></canvas>
-                </div>
+                <p style="text-align: center; padding: 20px; color: var(--gray);">Analytics functionality coming soon...</p>
             </div>
 
             <div class="content" id="settingsContent" style="display:none;">
                 <div class="dashboard-header">
                     <h2>Settings</h2>
                 </div>
-                <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 20px;">
-                    <p>Settings options will appear here.</p>
-                </div>
+                <p style="text-align: center; padding: 20px; color: var(--gray);">Settings functionality coming soon...</p>
             </div>
         </div>
     </div>
@@ -566,74 +578,32 @@
         </div>
     </div>
 
-    <!-- Add Ticket Modal -->
-    <div class="modal" id="addTicketModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="ticketModalTitle">Add New Ticket</h3>
-                <span class="close" id="closeTicketModal">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="ticketForm">
-                    <input type="hidden" id="ticketId">
-                    <div class="form-group">
-                        <label for="ticketTitle">Title *</label>
-                        <input type="text" id="ticketTitle" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="ticketDescription">Description</label>
-                        <textarea id="ticketDescription" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="ticketStatus">Status</label>
-                        <select id="ticketStatus">
-                            <option value="open">Open</option>
-                            <option value="closed">Closed</option>
-                        </select>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-cancel" id="cancelTicketBtn">Cancel</button>
-                        <button type="submit" class="btn btn-primary" id="submitTicketBtn">Save Ticket</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- API Settings Modal -->
     <div class="modal" id="apiSettingsModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>API Configuration</h3>
+                <h3>Neon DB Configuration</h3>
                 <span class="close" id="closeApiSettings">&times;</span>
             </div>
             <div class="modal-body">
                 <form id="apiSettingsForm">
                     <div class="form-group">
-                        <label for="apiUrl">API Base URL</label>
-                        <input type="text" id="apiUrl" required>
+                        <label for="neonEndpoint">Neon DB REST Endpoint</label>
+                        <input type="text" id="neonEndpoint" required 
+                               value="https://ep-royal-fire-aemrirs1.apirest.c-2.us-east-2.aws.neon.tech/neondb/rest/v1">
                     </div>
                     <div class="form-group">
-                        <label for="apiKey">API Key / Token</label>
-                        <input type="text" id="apiKey">
+                        <label for="neonApiKey">Neon API Key</label>
+                        <input type="password" id="neonApiKey" required 
+                               value="npg_CS42JdHaVXKw">
                     </div>
                     <div class="form-group">
-                        <label for="apiTimeout">Request Timeout (ms)</label>
-                        <input type="number" id="apiTimeout" min="100" step="100" value="5000">
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="apiDebug">
-                            Enable Debug Logging
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label for="apiHeaders">Custom Headers (JSON)</label>
-                        <textarea id="apiHeaders" rows="3" placeholder='{"X-Custom-Header":"value"}'></textarea>
+                        <label for="customersTable">Customers Table Name</label>
+                        <input type="text" id="customersTable" value="customers">
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-cancel" id="cancelApiSettings">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="submit" class="btn btn-primary">Save Configuration</button>
                     </div>
                 </form>
             </div>
@@ -646,318 +616,181 @@
         <span id="notificationMessage"></span>
     </div>
 
-    <!-- Add to your header for login -->
-    <button class="btn btn-primary" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
-    <span id="loggedInUser" style="margin-left:10px;"></span>
-
-    <!-- Custom Login Modal -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Login</h3>
-                <span class="close" id="closeLoginModal">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label for="loginEmail">Email</label>
-                        <input type="email" id="loginEmail" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="loginPassword">Password</label>
-                        <input type="password" id="loginPassword" required>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-cancel" id="cancelLoginBtn">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Login</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Chart.js CDN before your main script -->
+    <!-- Add Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Example: Replace with Stack Auth's actual SDK URL -->
-    <script src="https://cdn.stack-auth.com/sdk/latest/stack-auth.min.js"></script>
     <script>
-        // --- API Config ---
-        function getApiConfig() {
-            return {
-                // Set Neon Data API base URL
-                baseUrl: localStorage.getItem('apiBaseUrl') || 'https://ep-misty-wind-aedgzzqm.apirest.c-2.us-east-2.aws.neon.tech/neondb/rest/v1',
-                apiKey: localStorage.getItem('apiKey') || '', // <-- JWT token goes here!
-                timeout: parseInt(localStorage.getItem('apiTimeout') || '5000', 10),
-                debug: localStorage.getItem('apiDebug') === 'true',
-                headers: (() => {
-                    try {
-                        return JSON.parse(localStorage.getItem('apiHeaders') || '{}');
-                    } catch { return {}; }
-                })()
-            };
-        }
-        function setApiConfig(config) {
-            localStorage.setItem('apiBaseUrl', config.baseUrl);
-            localStorage.setItem('apiKey', config.apiKey);
-            localStorage.setItem('apiTimeout', config.timeout);
-            localStorage.setItem('apiDebug', config.debug);
-            localStorage.setItem('apiHeaders', JSON.stringify(config.headers));
-        }
-        let API_CONFIG = getApiConfig();
-
-        // --- Modal functionality ---
-        const modal = document.getElementById('addCustomerModal');
-        const addCustomerBtn = document.getElementById('addCustomerBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const closeBtn = document.querySelector('.close');
-        const customerForm = document.getElementById('customerForm');
-        const notification = document.getElementById('notification');
-        const notificationIcon = document.getElementById('notificationIcon');
-        const notificationMessage = document.getElementById('notificationMessage');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const customersContainer = document.getElementById('customersContainer');
-        const searchInput = document.getElementById('searchInput');
-        const modalTitle = document.getElementById('modalTitle');
-        const customerIdField = document.getElementById('customerId');
-        const submitBtn = document.getElementById('submitBtn');
-
-        let editingCustomerId = null;
+        // --- Neon DB Integration ---
+        const NEON_CONFIG = {
+            endpoint: localStorage.getItem('neonEndpoint') || 'https://ep-royal-fire-aemrirs1.apirest.c-2.us-east-2.aws.neon.tech/neondb/rest/v1',
+            apiKey: localStorage.getItem('neonApiKey') || 'npg_CS42JdHaVXKw',
+            customersTable: localStorage.getItem('customersTable') || 'customers'
+        };
 
         // Show notification
         function showNotification(message, isSuccess = true) {
+            const notification = document.getElementById('notification');
+            const notificationIcon = document.getElementById('notificationIcon');
+            const notificationMessage = document.getElementById('notificationMessage');
+            
             notification.className = isSuccess ? 
                 'notification success show' : 'notification error show';
             notificationIcon.className = isSuccess ? 
                 'fas fa-check-circle' : 'fas fa-exclamation-circle';
             notificationMessage.textContent = message;
+            
             setTimeout(() => {
                 notification.className = 'notification';
             }, 3000);
         }
 
-        // Show loading state
-        function setLoading(isLoading) {
-            loadingSpinner.style.display = isLoading ? 'block' : 'none';
-        }
-
-        // Open modal for adding or editing
-        function openModal(isEditing = false) {
-            modal.style.display = 'flex';
-            modalTitle.textContent = isEditing ? 'Edit Customer' : 'Add New Customer';
-            submitBtn.textContent = isEditing ? 'Update Customer' : 'Save Customer';
-            if (!isEditing) {
-                customerForm.reset();
-                customerIdField.value = '';
+        // Update API connection status
+        function updateApiStatus(isConnected, message) {
+            const indicator = document.getElementById('apiStatusIndicator');
+            const statusText = document.getElementById('apiStatusText');
+            
+            if (isConnected) {
+                indicator.className = 'status-indicator status-connected';
+                statusText.textContent = message || 'Connected to Neon DB';
+            } else {
+                indicator.className = 'status-indicator status-disconnected';
+                statusText.textContent = message || 'Disconnected from Neon DB';
             }
         }
-        addCustomerBtn.addEventListener('click', () => openModal(false));
-        document.getElementById('addCustomerFab').addEventListener('click', () => openModal(false));
 
-        // Close modal
-        const closeModal = () => {
-            modal.style.display = 'none';
-            editingCustomerId = null;
-        };
-        cancelBtn.addEventListener('click', closeModal);
-        closeBtn.addEventListener('click', closeModal);
-        window.addEventListener('click', (event) => {
-            if (event.target === modal) closeModal();
-        });
-
-        // --- Form Validation & Submit ---
-        customerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            if (!name || !email) {
-                showNotification('Name and Email are required.', false);
-                return;
-            }
-            const customerData = {
-                name,
-                email,
-                phone: document.getElementById('phone').value,
-                company: document.getElementById('company').value,
-                status: document.getElementById('status').value,
-                notes: document.getElementById('notes').value
-            };
-            setLoading(true);
-            try {
-                if (customerIdField.value) {
-                    await updateCustomerInDatabase(customerIdField.value, customerData);
-                    showNotification('Customer updated successfully!');
-                } else {
-                    await saveCustomerToDatabase(customerData);
-                    showNotification('Customer saved successfully!');
+        // Make API requests to Neon DB
+        async function neonApiRequest(path, options = {}) {
+            const url = `${NEON_CONFIG.endpoint}${path}`;
+            
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${NEON_CONFIG.apiKey}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 }
-                closeModal();
-                loadCustomers(searchInput.value);
+            };
+            
+            const mergedOptions = { ...defaultOptions, ...options };
+            
+            try {
+                const response = await fetch(url, mergedOptions);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Neon API request failed:', error);
+                throw error;
+            }
+        }
+
+        // Test Neon DB connection
+        async function testNeonConnection() {
+            try {
+                updateApiStatus(false, 'Testing connection...');
+                
+                // Try to get a list of tables to test the connection
+                const result = await neonApiRequest('/');
+                
+                updateApiStatus(true, 'Connected to Neon DB');
+                return true;
+            } catch (error) {
+                updateApiStatus(false, 'Connection failed: ' + error.message);
+                showNotification('Neon DB connection failed: ' + error.message, false);
+                return false;
+            }
+        }
+
+        // Load customers from Neon DB
+        async function loadCustomersFromNeon() {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const customersContainer = document.getElementById('customersContainer');
+            
+            loadingSpinner.style.display = 'block';
+            customersContainer.innerHTML = '';
+            
+            try {
+                // Get customers from Neon DB
+                const result = await neonApiRequest(`/tables/${NEON_CONFIG.customersTable}/rows`);
+                
+                if (result.rows && result.rows.length > 0) {
+                    displayCustomers(result.rows);
+                    document.getElementById('dashboardCustomerCount').textContent = result.rows.length;
+                } else {
+                    customersContainer.innerHTML = '<div class="customer-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5;">No customers found in Neon DB</div></div>';
+                }
+                
+                showNotification('Customers loaded successfully from Neon DB');
+            } catch (error) {
+                customersContainer.innerHTML = '<div class="customer-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5; color: var(--accent);">Error loading customers: ' + error.message + '</div></div>';
+                showNotification('Error loading customers: ' + error.message, false);
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Save customer to Neon DB
+        async function saveCustomerToNeon(customerData) {
+            try {
+                const result = await neonApiRequest(`/tables/${NEON_CONFIG.customersTable}/rows`, {
+                    method: 'POST',
+                    body: JSON.stringify(customerData)
+                });
+                
+                showNotification('Customer saved successfully to Neon DB');
+                return result;
             } catch (error) {
                 showNotification('Error saving customer: ' + error.message, false);
-            } finally {
-                setLoading(false);
+                throw error;
             }
-        });
+        }
 
-        // --- API Settings Modal Logic ---
-        const apiSettingsModal = document.getElementById('apiSettingsModal');
-        const openApiSettingsBtn = document.createElement('li');
-        openApiSettingsBtn.className = 'menu-item';
-        openApiSettingsBtn.innerHTML = '<i class="fas fa-link"></i> API Settings';
-        document.querySelector('.menu').appendChild(openApiSettingsBtn);
-
-        const closeApiSettings = document.getElementById('closeApiSettings');
-        const cancelApiSettings = document.getElementById('cancelApiSettings');
-        const apiSettingsForm = document.getElementById('apiSettingsForm');
-        const apiUrlInput = document.getElementById('apiUrl');
-        const apiKeyInput = document.getElementById('apiKey');
-        const apiTimeoutInput = document.getElementById('apiTimeout');
-        const apiDebugInput = document.getElementById('apiDebug');
-        const apiHeadersInput = document.getElementById('apiHeaders');
-
-        openApiSettingsBtn.addEventListener('click', () => {
-            apiSettingsModal.style.display = 'flex';
-            const config = getApiConfig();
-            apiUrlInput.value = config.baseUrl;
-            apiKeyInput.value = config.apiKey;
-            apiTimeoutInput.value = config.timeout;
-            apiDebugInput.checked = config.debug;
-            apiHeadersInput.value = JSON.stringify(config.headers, null, 2);
-        });
-        closeApiSettings.addEventListener('click', () => {
-            apiSettingsModal.style.display = 'none';
-        });
-        cancelApiSettings.addEventListener('click', () => {
-            apiSettingsModal.style.display = 'none';
-        });
-        window.addEventListener('click', (event) => {
-            if (event.target === apiSettingsModal) apiSettingsModal.style.display = 'none';
-        });
-        apiSettingsForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            let headers = {};
+        // Update customer in Neon DB
+        async function updateCustomerInNeon(id, customerData) {
             try {
-                headers = JSON.parse(apiHeadersInput.value || '{}');
-            } catch {
-                showNotification('Invalid JSON in custom headers', false);
-                return;
-            }
-            setApiConfig({
-                baseUrl: apiUrlInput.value.trim(),
-                apiKey: apiKeyInput.value.trim(),
-                timeout: parseInt(apiTimeoutInput.value, 10),
-                debug: apiDebugInput.checked,
-                headers
-            });
-            API_CONFIG = getApiConfig();
-            apiSettingsModal.style.display = 'none';
-            showNotification('API configuration updated!', true);
-            loadCustomers(searchInput.value);
-        });
-
-        // --- Custom Login Modal Logic ---
-        const loginModal = document.getElementById('loginModal');
-        const loginForm = document.getElementById('loginForm');
-        const loginEmail = document.getElementById('loginEmail');
-        const loginPassword = document.getElementById('loginPassword');
-        const closeLoginModal = document.getElementById('closeLoginModal');
-        const cancelLoginBtn = document.getElementById('cancelLoginBtn');
-        const loginBtn = document.getElementById('loginBtn');
-        const loggedInUser = document.getElementById('loggedInUser');
-
-        loginBtn.addEventListener('click', () => {
-            loginModal.style.display = 'flex';
-            loginForm.reset();
-        });
-        closeLoginModal.addEventListener('click', () => {
-            loginModal.style.display = 'none';
-        });
-        cancelLoginBtn.addEventListener('click', () => {
-            loginModal.style.display = 'none';
-        });
-        window.addEventListener('click', (event) => {
-            if (event.target === loginModal) loginModal.style.display = 'none';
-        });
-
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = loginEmail.value.trim();
-            const password = loginPassword.value;
-            if (!email || !password) return;
-
-            try {
-                const session = await stackApp.auth.loginWithEmailAndPassword(email, password);
-                const jwtToken = session.tokens.jwt;
-
-                setApiConfig({
-                    ...getApiConfig(),
-                    apiKey: jwtToken
+                const result = await neonApiRequest(`/tables/${NEON_CONFIG.customersTable}/rows/${id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(customerData)
                 });
-                API_CONFIG = getApiConfig();
-
-                showNotification('Login successful!', true);
-                loggedInUser.textContent = `Logged in as ${session.user.displayName || email}`;
-                loginModal.style.display = 'none';
-                loadCustomers(searchInput.value);
-            } catch (err) {
-                showNotification('Login failed: ' + (err.message || err), false);
+                
+                showNotification('Customer updated successfully in Neon DB');
+                return result;
+            } catch (error) {
+                showNotification('Error updating customer: ' + error.message, false);
+                throw error;
             }
-        });
-
-        // --- Stack Auth Public Config ---
-        const STACK_PROJECT_ID = '670cb40f-90d2-478e-9a4a-7829c1d91873';
-        const STACK_PUBLISHABLE_CLIENT_KEY = 'pck_7700yg0gjvvtqwm6678f3becyct8apcqjv59n0maez6p8';
-
-        // --- Stack Auth Login Flow ---
-        // Initialize Stack Auth Client App
-        const stackApp = new window.StackClientApp({
-            projectId: STACK_PROJECT_ID,
-            publishableClientKey: STACK_PUBLISHABLE_CLIENT_KEY
-        });
-
-        // --- API CRUD Functions for Neon Data API ---
-        const CUSTOMERS_TABLE = 'customers';
-
-        // Helper to build Neon API URLs
-        function neonUrl(path) {
-            return `${API_CONFIG.baseUrl}${path}`;
         }
 
-        // --- Sample Data for Customers ---
-        const SAMPLE_CUSTOMERS = [
-            { id: 1, name: 'Sarah Johnson', email: 'sarah@example.com', phone: '(555) 123-4567', status: 'active', company: 'Acme Inc.', notes: 'VIP customer' },
-            { id: 2, name: 'Michael Chen', email: 'michael@example.com', phone: '(555) 987-6543', status: 'active', company: 'Beta LLC', notes: '' },
-            { id: 3, name: 'Emily Rodriguez', email: 'emily@example.com', phone: '(555) 456-7890', status: 'inactive', company: 'Gamma Corp', notes: 'Requested follow-up' },
-            { id: 4, name: 'David Wilson', email: 'david@example.com', phone: '(555) 234-5678', status: 'active', company: 'Delta Ltd', notes: '' }
-        ];
-
-        // --- Fetch Customers from Neon DB ---
-        async function fetchCustomers(filter = '') {
-            let url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows`);
-            if (filter) {
-                // Neon Data API supports basic filtering via query params, but you may need to filter client-side
-                // For advanced filtering, see Neon docs
+        // Delete customer from Neon DB
+        async function deleteCustomerFromNeon(id) {
+            try {
+                const result = await neonApiRequest(`/tables/${NEON_CONFIG.customersTable}/rows/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                showNotification('Customer deleted successfully from Neon DB');
+                return result;
+            } catch (error) {
+                showNotification('Error deleting customer: ' + error.message, false);
+                throw error;
             }
-            const result = await apiFetch(url, { method: 'GET' });
-            return result.rows || [];
         }
 
-        // --- Display Customers ---
+        // Display customers in the UI
         function displayCustomers(customers) {
+            const customersContainer = document.getElementById('customersContainer');
             customersContainer.innerHTML = '';
-            if (!customers || customers.length === 0) {
-                customersContainer.innerHTML = '<div class="customer-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5;">No customers found</div></div>';
-                return;
-            }
+            
             customers.forEach(customer => {
                 const row = document.createElement('div');
                 row.className = 'customer-row';
                 row.innerHTML = `
-                    <div>${customer.name}</div>
-                    <div>${customer.email}</div>
+                    <div>${customer.name || 'N/A'}</div>
+                    <div>${customer.email || 'N/A'}</div>
                     <div>${customer.phone || 'N/A'}</div>
-                    <div><span class="status status-${customer.status}">${customer.status ? customer.status.charAt(0).toUpperCase() + customer.status.slice(1) : ''}</span></div>
+                    <div><span class="status status-${customer.status || 'active'}">${customer.status || 'active'}</span></div>
                     <div class="actions">
                         <button class="action-btn edit-btn" data-id="${customer.id}"><i class="fas fa-edit"></i></button>
                         <button class="action-btn delete-btn" data-id="${customer.id}"><i class="fas fa-trash"></i></button>
@@ -965,162 +798,210 @@
                 `;
                 customersContainer.appendChild(row);
             });
+            
+            // Add event listeners to action buttons
             document.querySelectorAll('.edit-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const customerId = btn.getAttribute('data-id');
                     editCustomer(customerId);
                 });
             });
+            
             document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', async () => {
+                btn.addEventListener('click', () => {
                     const customerId = btn.getAttribute('data-id');
-                    if (!confirm('Are you sure you want to delete this customer?')) return;
-                    try {
-                        await deleteCustomerFromDatabase(customerId);
-                        showNotification('Customer deleted successfully');
-                        loadCustomers(searchInput.value);
-                    } catch (error) {
-                        showNotification('Error deleting customer', false);
+                    if (confirm('Are you sure you want to delete this customer?')) {
+                        deleteCustomer(customerId);
                     }
                 });
             });
         }
 
-        // --- Load Customers and Wire Up Search ---
-        async function loadCustomers(filter = '') {
-            setLoading(true);
+        // Edit customer
+        async function editCustomer(id) {
             try {
-                const customers = await fetchCustomers(filter);
-                displayCustomers(customers);
+                // In a real app, you would fetch the customer data from the DB
+                // For this demo, we'll just show the modal with the ID
+                document.getElementById('customerId').value = id;
+                document.getElementById('modalTitle').textContent = 'Edit Customer';
+                document.getElementById('submitBtn').textContent = 'Update Customer';
+                
+                // Show the modal
+                document.getElementById('addCustomerModal').style.display = 'flex';
+                
+                showNotification('Edit customer with ID: ' + id);
             } catch (error) {
-                showNotification('Error loading customers', false);
-            } finally {
-                setLoading(false);
-            }
-        }
-        searchInput.addEventListener('input', (e) => {
-            loadCustomers(e.target.value);
-        });
-
-        // --- Edit Customer Modal ---
-        async function editCustomer(customerId) {
-            setLoading(true);
-            try {
-                const url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows/${customerId}`);
-                const result = await apiFetch(url, { method: 'GET' });
-                const customer = result.row || {};
-                editingCustomerId = customerId;
-                modal.style.display = 'flex';
-                modalTitle.textContent = 'Edit Customer';
-                submitBtn.textContent = 'Update Customer';
-                document.getElementById('name').value = customer.name || '';
-                document.getElementById('email').value = customer.email || '';
-                document.getElementById('phone').value = customer.phone || '';
-                document.getElementById('company').value = customer.company || '';
-                document.getElementById('status').value = customer.status || 'active';
-                document.getElementById('notes').value = customer.notes || '';
-                customerIdField.value = customerId;
-            } catch (error) {
-                showNotification('Error loading customer', false);
-            } finally {
-                setLoading(false);
+                showNotification('Error preparing customer edit: ' + error.message, false);
             }
         }
 
-        // --- Save/Update Customer ---
-        customerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            if (!name || !email) {
-                showNotification('Name and Email are required.', false);
-                return;
+        // Delete customer
+        async function deleteCustomer(id) {
+            try {
+                await deleteCustomerFromNeon(id);
+                loadCustomersFromNeon(); // Reload the customer list
+            } catch (error) {
+                console.error('Error deleting customer:', error);
             }
-            const customerData = {
-                name,
-                email,
-                phone: document.getElementById('phone').value,
-                company: document.getElementById('company').value,
-                status: document.getElementById('status').value,
-                notes: document.getElementById('notes').value
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up tab navigation
+            const menuItems = document.querySelectorAll('.menu-item');
+            const contentAreas = {
+                dashboard: document.getElementById('dashboardContent'),
+                customers: document.getElementById('customersContent'),
+                tickets: document.getElementById('ticketsContent'),
+                analytics: document.getElementById('analyticsContent'),
+                settings: document.getElementById('settingsContent')
             };
-            setLoading(true);
-            try {
-                if (customerIdField.value) {
-                    await updateCustomerInDatabase(customerIdField.value, customerData);
-                    showNotification('Customer updated successfully!');
-                } else {
-                    await saveCustomerToDatabase(customerData);
-                    showNotification('Customer saved successfully!');
+            
+            function showTab(tabName) {
+                // Hide all content areas
+                Object.values(contentAreas).forEach(area => {
+                    area.style.display = 'none';
+                });
+                
+                // Show the selected tab
+                if (contentAreas[tabName]) {
+                    contentAreas[tabName].style.display = 'block';
                 }
-                closeModal();
-                loadCustomers(searchInput.value);
-            } catch (error) {
-                showNotification('Error saving customer: ' + error.message, false);
-            } finally {
-                setLoading(false);
             }
-        });
-
-        // --- Neon Data API CRUD Functions ---
-        async function saveCustomerToDatabase(customerData) {
-            const url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows`);
-            const result = await apiFetch(url, {
-                method: 'POST',
-                body: JSON.stringify({ row: customerData })
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Show the corresponding tab
+                    const tabName = this.getAttribute('data-tab');
+                    if (tabName) {
+                        showTab(tabName);
+                        
+                        // Load data if it's the customers tab
+                        if (tabName === 'customers') {
+                            loadCustomersFromNeon();
+                        }
+                    }
+                });
             });
-            return result;
-        }
-
-        async function updateCustomerInDatabase(id, customerData) {
-            const url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows/${id}`);
-            const result = await apiFetch(url, {
-                method: 'PATCH',
-                body: JSON.stringify({ row: customerData })
-            });
-            return result;
-        }
-
-        async function deleteCustomerFromDatabase(id) {
-            const url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows/${id}`);
-            const result = await apiFetch(url, { method: 'DELETE' });
-            return result;
-        }
-
-        // --- Tab Switching (ensure Customers tab loads data) ---
-        menuItems.forEach((item, idx) => {
-            item.addEventListener('click', () => {
-                menuItems.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                if (idx === 0) {
-                    showTab('dashboard');
-                    updateDashboard();
-                }
-                if (idx === 1) {
-                    showTab('customers');
-                    loadCustomers(searchInput.value);
-                }
-                if (idx === 2) {
-                    showTab('tickets');
-                    loadTickets();
-                }
-                if (idx === 3) {
-                    showTab('analytics');
-                    updateAnalytics();
-                }
-                if (idx === 4) {
-                    showTab('settings');
+            
+            // Set up modal functionality
+            const modal = document.getElementById('addCustomerModal');
+            const addCustomerBtn = document.getElementById('addCustomerBtn');
+            const addCustomerFab = document.getElementById('addCustomerFab');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const closeBtn = document.querySelector('.close');
+            const customerForm = document.getElementById('customerForm');
+            
+            function openModal() {
+                modal.style.display = 'flex';
+                document.getElementById('modalTitle').textContent = 'Add New Customer';
+                document.getElementById('submitBtn').textContent = 'Save Customer';
+                customerForm.reset();
+                document.getElementById('customerId').value = '';
+            }
+            
+            function closeModal() {
+                modal.style.display = 'none';
+            }
+            
+            addCustomerBtn.addEventListener('click', openModal);
+            addCustomerFab.addEventListener('click', openModal);
+            cancelBtn.addEventListener('click', closeModal);
+            closeBtn.addEventListener('click', closeModal);
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
                 }
             });
-        });
-
-        // Show dashboard by default on load
-        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Handle form submission
+            customerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const customerId = document.getElementById('customerId').value;
+                const customerData = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    company: document.getElementById('company').value,
+                    status: document.getElementById('status').value,
+                    notes: document.getElementById('notes').value
+                };
+                
+                try {
+                    if (customerId) {
+                        // Update existing customer
+                        await updateCustomerInNeon(customerId, customerData);
+                    } else {
+                        // Add new customer
+                        await saveCustomerToNeon(customerData);
+                    }
+                    
+                    closeModal();
+                    loadCustomersFromNeon(); // Reload the customer list
+                } catch (error) {
+                    console.error('Error saving customer:', error);
+                }
+            });
+            
+            // Set up API settings modal
+            const apiSettingsModal = document.getElementById('apiSettingsModal');
+            const apiSettingsMenuItem = document.getElementById('apiSettingsMenuItem');
+            const closeApiSettings = document.getElementById('closeApiSettings');
+            const cancelApiSettings = document.getElementById('cancelApiSettings');
+            const apiSettingsForm = document.getElementById('apiSettingsForm');
+            const neonEndpointInput = document.getElementById('neonEndpoint');
+            const neonApiKeyInput = document.getElementById('neonApiKey');
+            const customersTableInput = document.getElementById('customersTable');
+            
+            apiSettingsMenuItem.addEventListener('click', function() {
+                // Pre-fill the form with current values
+                neonEndpointInput.value = NEON_CONFIG.endpoint;
+                neonApiKeyInput.value = NEON_CONFIG.apiKey;
+                customersTableInput.value = NEON_CONFIG.customersTable;
+                
+                apiSettingsModal.style.display = 'flex';
+            });
+            
+            closeApiSettings.addEventListener('click', function() {
+                apiSettingsModal.style.display = 'none';
+            });
+            
+            cancelApiSettings.addEventListener('click', function() {
+                apiSettingsModal.style.display = 'none';
+            });
+            
+            apiSettingsForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Save the new configuration
+                NEON_CONFIG.endpoint = neonEndpointInput.value;
+                NEON_CONFIG.apiKey = neonApiKeyInput.value;
+                NEON_CONFIG.customersTable = customersTableInput.value;
+                
+                // Save to localStorage
+                localStorage.setItem('neonEndpoint', NEON_CONFIG.endpoint);
+                localStorage.setItem('neonApiKey', NEON_CONFIG.apiKey);
+                localStorage.setItem('customersTable', NEON_CONFIG.customersTable);
+                
+                // Test the connection
+                testNeonConnection();
+                
+                // Close the modal
+                apiSettingsModal.style.display = 'none';
+                
+                showNotification('API configuration saved successfully');
+            });
+            
+            // Initialize the app
             showTab('dashboard');
-            updateDashboard();
-            loadCustomers();
-            loadTickets();
-            updateAnalytics();
+            testNeonConnection();
         });
     </script>
 </body>
