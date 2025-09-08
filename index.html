@@ -1233,6 +1233,61 @@
             });
         }
 
+        // --- Sidebar Tab Switching ---
+        const menuItems = document.querySelectorAll('.menu-item');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const customersContent = document.getElementById('customersContent');
+        const ticketsContent = document.getElementById('ticketsContent');
+        const analyticsContent = document.getElementById('analyticsContent');
+        const settingsContent = document.getElementById('settingsContent');
+
+        function showTab(tab) {
+            dashboardContent.style.display = 'none';
+            customersContent.style.display = 'none';
+            ticketsContent.style.display = 'none';
+            analyticsContent.style.display = 'none';
+            settingsContent.style.display = 'none';
+            if (tab === 'dashboard') dashboardContent.style.display = '';
+            if (tab === 'customers') customersContent.style.display = '';
+            if (tab === 'tickets') ticketsContent.style.display = '';
+            if (tab === 'analytics') analyticsContent.style.display = '';
+            if (tab === 'settings') settingsContent.style.display = '';
+        }
+
+        menuItems.forEach((item, idx) => {
+            item.addEventListener('click', () => {
+                menuItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                if (idx === 0) {
+                    showTab('dashboard');
+                    updateDashboard();
+                }
+                if (idx === 1) {
+                    showTab('customers');
+                    loadCustomers(searchInput.value);
+                }
+                if (idx === 2) {
+                    showTab('tickets');
+                    loadTickets();
+                }
+                if (idx === 3) {
+                    showTab('analytics');
+                    updateAnalytics();
+                }
+                if (idx === 4) {
+                    showTab('settings');
+                }
+            });
+        });
+
+        // Show dashboard by default on load
+        document.addEventListener('DOMContentLoaded', () => {
+            showTab('dashboard');
+            updateDashboard();
+            loadTickets();
+            updateAnalytics();
+        });
+
         // --- Update dashboard and analytics on load and after changes ---
         document.addEventListener('DOMContentLoaded', () => {
             showTab('dashboard');
