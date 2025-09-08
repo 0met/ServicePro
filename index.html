@@ -551,6 +551,36 @@
         <span id="notificationMessage"></span>
     </div>
 
+    <!-- Add to your header for login -->
+    <button class="btn btn-primary" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
+    <span id="loggedInUser" style="margin-left:10px;"></span>
+
+    <!-- Custom Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Login</h3>
+                <span class="close" id="closeLoginModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-cancel" id="cancelLoginBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Example: Replace with Stack Auth's actual SDK URL -->
     <script src="https://cdn.stack-auth.com/sdk/latest/stack-auth.min.js"></script>
     <script>
@@ -728,33 +758,40 @@
             loadCustomers(searchInput.value);
         });
 
-        // --- Stack Auth Public Config ---
-        const STACK_PROJECT_ID = '670cb40f-90d2-478e-9a4a-7829c1d91873';
-        const STACK_PUBLISHABLE_CLIENT_KEY = 'pck_7700yg0gjvvtqwm6678f3becyct8apcqjv59n0maez6p8';
-
-        // --- Stack Auth Login Flow ---
+        // --- Custom Login Modal Logic ---
+        const loginModal = document.getElementById('loginModal');
+        const loginForm = document.getElementById('loginForm');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const closeLoginModal = document.getElementById('closeLoginModal');
+        const cancelLoginBtn = document.getElementById('cancelLoginBtn');
         const loginBtn = document.getElementById('loginBtn');
         const loggedInUser = document.getElementById('loggedInUser');
 
-        // Replace with actual Stack Auth SDK usage
-        loginBtn.addEventListener('click', async () => {
-            // Show a simple prompt for email/password (replace with your UI)
-            const email = prompt('Enter your email:');
-            const password = prompt('Enter your password:');
+        loginBtn.addEventListener('click', () => {
+            loginModal.style.display = 'flex';
+            loginForm.reset();
+        });
+        closeLoginModal.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+        });
+        cancelLoginBtn.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+        });
+        window.addEventListener('click', (event) => {
+            if (event.target === loginModal) loginModal.style.display = 'none';
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = loginEmail.value.trim();
+            const password = loginPassword.value;
             if (!email || !password) return;
 
             try {
-                // Example: Replace with Stack Auth SDK/API call
-                const stackAuth = new window.StackAuth({
-                    projectId: STACK_PROJECT_ID,
-                    clientKey: STACK_PUBLISHABLE_CLIENT_KEY
-                });
+                const session = await stackApp.auth.loginWithEmailAndPassword(email, password);
+                const jwtToken = session.tokens.jwt;
 
-                // Authenticate user and get JWT token
-                const user = await stackAuth.loginWithEmail(email, password);
-                const jwtToken = user.token; // <-- This is your JWT!
-
-                // Save JWT token in API config
                 setApiConfig({
                     ...getApiConfig(),
                     apiKey: jwtToken
@@ -762,11 +799,23 @@
                 API_CONFIG = getApiConfig();
 
                 showNotification('Login successful!', true);
-                loggedInUser.textContent = `Logged in as ${user.display_name || email}`;
+                loggedInUser.textContent = `Logged in as ${session.user.displayName || email}`;
+                loginModal.style.display = 'none';
                 loadCustomers(searchInput.value);
             } catch (err) {
-                showNotification('Login failed: ' + err.message, false);
+                showNotification('Login failed: ' + (err.message || err), false);
             }
+        });
+
+        // --- Stack Auth Public Config ---
+        const STACK_PROJECT_ID = '670cb40f-90d2-478e-9a4a-7829c1d91873';
+        const STACK_PUBLISHABLE_CLIENT_KEY = 'pck_7700yg0gjvvtqwm6678f3becyct8apcqjv59n0maez6p8';
+
+        // --- Stack Auth Login Flow ---
+        // Initialize Stack Auth Client App
+        const stackApp = new window.StackClientApp({
+            projectId: STACK_PROJECT_ID,
+            publishableClientKey: STACK_PUBLISHABLE_CLIENT_KEY
         });
 
         // --- API CRUD Functions for Neon Data API ---
