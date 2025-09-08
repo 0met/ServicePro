@@ -941,7 +941,6 @@
                 const result = await apiFetch(url, { method: 'GET' });
                 customers = result.rows || [];
             } catch (e) {
-                // Fallback to sample data
                 customers = SAMPLE_CUSTOMERS;
             }
             // Filter if needed
@@ -957,324 +956,112 @@
             return customers;
         }
 
-        // Add a customer
-        async function saveCustomerToDatabase(customerData) {
-            const url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows`);
-            // Neon expects { row: { ... } }
-            const result = await apiFetch(url, {
-                method: 'POST',
-                body: JSON.stringify({ row: customerData })
+        // --- Display Customers ---
+        function displayCustomers(customers) {
+            customersContainer.innerHTML = '';
+            if (!customers || customers.length === 0) {
+                customersContainer.innerHTML = '<div class="customer-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5;">No customers found</div></div>';
+                return;
+            }
+            customers.forEach(customer => {
+                const row = document.createElement('div');
+                row.className = 'customer-row';
+                row.innerHTML = `
+                    <div>${customer.name}</div>
+                    <div>${customer.email}</div>
+                    <div>${customer.phone || 'N/A'}</div>
+                    <div><span class="status status-${customer.status}">${customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}</span></div>
+                    <div class="actions">
+                        <button class="action-btn edit-btn" data-id="${customer.id}"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn delete-btn" data-id="${customer.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                customersContainer.appendChild(row);
             });
-            return result;
-        }
-
-        // Update a customer
-        async function updateCustomerInDatabase(id, customerData) {
-            const url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows/${id}`);
-            // Neon expects { row: { ... } }
-            const result = await apiFetch(url, {
-                method: 'PATCH',
-                body: JSON.stringify({ row: customerData })
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const customerId = btn.getAttribute('data-id');
+                    editCustomerDemo(customerId);
+                });
             });
-            return result;
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const customerId = btn.getAttribute('data-id');
+                    const idx = SAMPLE_CUSTOMERS.findIndex(c => c.id == customerId);
+                    if (idx !== -1) {
+                        SAMPLE_CUSTOMERS.splice(idx, 1);
+                        showNotification('Customer deleted (demo)');
+                        loadCustomers(searchInput.value);
+                    }
+                });
+            });
         }
 
-        // Delete a customer
-        async function deleteCustomerFromDatabase(id) {
-            const url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows/${id}`);
-            const result = await apiFetch(url, { method: 'DELETE' });
-            return result;
-        }
-
-        // Fetch a single customer for editing
-        async function editCustomer(customerId) {
+        // --- Load Customers and Wire Up Search ---
+        async function loadCustomers(filter = '') {
             setLoading(true);
             try {
-                const url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows/${customerId}`);
-                const result = await apiFetch(url, { method: 'GET' });
-                const customer = result.row || {};
-                editingCustomerId = customerId;
-                modal.style.display = 'flex';
-                modalTitle.textContent = 'Edit Customer';
-                submitBtn.textContent = 'Update Customer';
-                document.getElementById('name').value = customer.name || '';
-                document.getElementById('email').value = customer.email || '';
-                document.getElementById('phone').value = customer.phone || '';
-                document.getElementById('company').value = customer.company || '';
-                document.getElementById('status').value = customer.status || 'active';
-                document.getElementById('notes').value = customer.notes || '';
-                customerIdField.value = customerId;
+                const customers = await fetchCustomers(filter);
+                displayCustomers(customers);
             } catch (error) {
-                showNotification('Error loading customer', false);
+                showNotification('Error loading customers', false);
             } finally {
                 setLoading(false);
             }
         }
-
-        // --- Ticket CRUD Functions (Neon Data API) ---
-        const TICKETS_TABLE = 'tickets';
-
-        function neonTicketUrl(path) {
-            return `${API_CONFIG.baseUrl}${path}`;
-        }
-
-        async function fetchTickets() {
-            const url = neonTicketUrl(`/tables/${TICKETS_TABLE}/rows`);
-            const result = await apiFetch(url, { method: 'GET' });
-            return result.rows || [];
-        }
-
-        async function saveTicketToDatabase(ticketData) {
-            const url = neonTicketUrl(`/tables/${TICKETS_TABLE}/rows`);
-            const result = await apiFetch(url, {
-                method: 'POST',
-                body: JSON.stringify({ row: ticketData })
-            });
-            return result;
-        }
-
-        async function updateTicketInDatabase(id, ticketData) {
-            const url = neonTicketUrl(`/tables/${TICKETS_TABLE}/rows/${id}`);
-            const result = await apiFetch(url, {
-                method: 'PATCH',
-                body: JSON.stringify({ row: ticketData })
-            });
-            return result;
-        }
-
-        async function deleteTicketFromDatabase(id) {
-            const url = neonTicketUrl(`/tables/${TICKETS_TABLE}/rows/${id}`);
-            const result = await apiFetch(url, { method: 'DELETE' });
-            return result;
-        }
-
-        async function editTicket(ticketId) {
-            setLoadingTicket(true);
-            try {
-                const url = neonTicketUrl(`/tables/${TICKETS_TABLE}/rows/${ticketId}`);
-                const result = await apiFetch(url, { method: 'GET' });
-                const ticket = result.row || {};
-                editingTicketId = ticketId;
-                ticketModal.style.display = 'flex';
-                ticketModalTitle.textContent = 'Edit Ticket';
-                submitTicketBtn.textContent = 'Update Ticket';
-                ticketTitle.value = ticket.title || '';
-                ticketDescription.value = ticket.description || '';
-                ticketStatus.value = ticket.status || 'open';
-                ticketIdField.value = ticketId;
-            } catch (error) {
-                showNotification('Error loading ticket', false);
-            } finally {
-                setLoadingTicket(false);
-            }
-        }
-
-        // --- Modal Logic ---
-        const ticketModal = document.getElementById('addTicketModal');
-        const addTicketBtn = document.getElementById('addTicketBtn');
-        const closeTicketModal = document.getElementById('closeTicketModal');
-        const cancelTicketBtn = document.getElementById('cancelTicketBtn');
-        const ticketForm = document.getElementById('ticketForm');
-        const ticketModalTitle = document.getElementById('ticketModalTitle');
-        const ticketTitle = document.getElementById('ticketTitle');
-        const ticketDescription = document.getElementById('ticketDescription');
-        const ticketStatus = document.getElementById('ticketStatus');
-        const ticketIdField = document.getElementById('ticketId');
-        const submitTicketBtn = document.getElementById('submitTicketBtn');
-        const ticketsContainer = document.getElementById('ticketsContainer');
-        const loadingTicketSpinner = document.getElementById('loadingTicketSpinner');
-        let editingTicketId = null;
-
-        function setLoadingTicket(isLoading) {
-            loadingTicketSpinner.style.display = isLoading ? 'block' : 'none';
-        }
-
-        addTicketBtn.addEventListener('click', () => {
-            ticketModal.style.display = 'flex';
-            ticketForm.reset();
-            editingTicketId = null;
-            ticketModalTitle.textContent = 'Add New Ticket';
-            submitTicketBtn.textContent = 'Save Ticket';
-            ticketIdField.value = '';
-        });
-        closeTicketModal.addEventListener('click', () => {
-            ticketModal.style.display = 'none';
-            editingTicketId = null;
-        });
-        cancelTicketBtn.addEventListener('click', () => {
-            ticketModal.style.display = 'none';
-            editingTicketId = null;
-        });
-        window.addEventListener('click', (event) => {
-            if (event.target === ticketModal) ticketModal.style.display = 'none';
+        searchInput.addEventListener('input', (e) => {
+            loadCustomers(e.target.value);
         });
 
-        ticketForm.addEventListener('submit', async (e) => {
+        // --- Edit Customer Modal (demo only) ---
+        function editCustomerDemo(customerId) {
+            let customer = SAMPLE_CUSTOMERS.find(c => c.id == customerId);
+            if (!customer) return;
+            editingCustomerId = customerId;
+            modal.style.display = 'flex';
+            modalTitle.textContent = 'Edit Customer';
+            submitBtn.textContent = 'Update Customer';
+            document.getElementById('name').value = customer.name || '';
+            document.getElementById('email').value = customer.email || '';
+            document.getElementById('phone').value = customer.phone || '';
+            document.getElementById('company').value = customer.company || '';
+            document.getElementById('status').value = customer.status || 'active';
+            document.getElementById('notes').value = customer.notes || '';
+            customerIdField.value = customerId;
+        }
+
+        // --- Save/Update Customer (demo only) ---
+        customerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const title = ticketTitle.value.trim();
-            if (!title) {
-                showNotification('Title is required.', false);
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            if (!name || !email) {
+                showNotification('Name and Email are required.', false);
                 return;
             }
-            const ticketData = {
-                title,
-                description: ticketDescription.value,
-                status: ticketStatus.value
+            const customerData = {
+                id: customerIdField.value ? parseInt(customerIdField.value) : Date.now(),
+                name,
+                email,
+                phone: document.getElementById('phone').value,
+                company: document.getElementById('company').value,
+                status: document.getElementById('status').value,
+                notes: document.getElementById('notes').value
             };
-            setLoadingTicket(true);
-            try {
-                if (ticketIdField.value) {
-                    await updateTicketInDatabase(ticketIdField.value, ticketData);
-                    showNotification('Ticket updated successfully!');
-                } else {
-                    await saveTicketToDatabase(ticketData);
-                    showNotification('Ticket saved successfully!');
-                }
-                ticketModal.style.display = 'none';
-                loadTickets();
-                updateDashboard();
-                updateAnalytics();
-            } catch (error) {
-                showNotification('Error saving ticket: ' + error.message, false);
-            } finally {
-                setLoadingTicket(false);
+            if (customerIdField.value) {
+                // Update sample data
+                const idx = SAMPLE_CUSTOMERS.findIndex(c => c.id == customerData.id);
+                if (idx !== -1) SAMPLE_CUSTOMERS[idx] = customerData;
+                showNotification('Customer updated (demo)');
+            } else {
+                SAMPLE_CUSTOMERS.unshift(customerData);
+                showNotification('Customer saved (demo)');
             }
+            closeModal();
+            loadCustomers(searchInput.value);
         });
 
-        async function loadTickets() {
-            setLoadingTicket(true);
-            try {
-                const tickets = await fetchTickets();
-                displayTickets(tickets);
-            } catch (error) {
-                showNotification('Error loading tickets', false);
-            } finally {
-                setLoadingTicket(false);
-            }
-        }
-
-        function displayTickets(tickets) {
-            ticketsContainer.innerHTML = '';
-            if (!tickets || tickets.length === 0) {
-                ticketsContainer.innerHTML = '<div class="customer-row"><div colspan="4" style="text-align: center; grid-column: 1 / span 4;">No tickets found</div></div>';
-                return;
-            }
-            tickets.forEach(ticket => {
-                const row = document.createElement('div');
-                row.className = 'customer-row';
-                row.innerHTML = `
-                    <div>${ticket.title}</div>
-                    <div>${ticket.description || 'N/A'}</div>
-                    <div><span class="status status-${ticket.status}">${ticket.status ? ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1) : ''}</span></div>
-                    <div class="actions">
-                        <button class="action-btn edit-ticket-btn" data-id="${ticket.id}"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn delete-ticket-btn" data-id="${ticket.id}"><i class="fas fa-trash"></i></button>
-                    </div>
-                `;
-                ticketsContainer.appendChild(row);
-            });
-            document.querySelectorAll('.edit-ticket-btn').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const ticketId = btn.getAttribute('data-id');
-                    await editTicket(ticketId);
-                });
-            });
-            document.querySelectorAll('.delete-ticket-btn').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const ticketId = btn.getAttribute('data-id');
-                    if (!confirm('Are you sure you want to delete this ticket?')) return;
-                    try {
-                        await deleteTicketFromDatabase(ticketId);
-                        showNotification('Ticket deleted successfully');
-                        loadTickets();
-                        updateDashboard();
-                        updateAnalytics();
-                    } catch (error) {
-                        showNotification('Error deleting ticket', false);
-                    }
-                });
-            });
-        }
-
-        let customerStatusChart, ticketStatusChart;
-
-        async function updateAnalytics() {
-            // Customers
-            let customers = [];
-            try {
-                customers = await fetchCustomers();
-            } catch {}
-            let activeCount = customers.filter(c => c.status === 'active').length;
-            let inactiveCount = customers.filter(c => c.status === 'inactive').length;
-
-            // Tickets
-            let tickets = [];
-            try {
-                tickets = await fetchTickets();
-            } catch {}
-            let openCount = tickets.filter(t => t.status === 'open').length;
-            let closedCount = tickets.filter(t => t.status === 'closed').length;
-
-            // Customer Status Chart
-            const customerCtx = document.getElementById('customerStatusChart').getContext('2d');
-            if (customerStatusChart) customerStatusChart.destroy();
-            customerStatusChart = new Chart(customerCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Active', 'Inactive'],
-                    datasets: [{
-                        data: [activeCount, inactiveCount],
-                        backgroundColor: ['#2D9D78', '#FF5D5D'],
-                    }]
-                },
-                options: {
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-
-            // Ticket Status Chart
-            const ticketCtx = document.getElementById('ticketStatusChart').getContext('2d');
-            if (ticketStatusChart) ticketStatusChart.destroy();
-            ticketStatusChart = new Chart(ticketCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Open', 'Closed'],
-                    datasets: [{
-                        data: [openCount, closedCount],
-                        backgroundColor: ['#2D9D78', '#FF5D5D'],
-                    }]
-                },
-                options: {
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-        }
-
-        // --- Sidebar Tab Switching ---
-        const menuItems = document.querySelectorAll('.menu-item');
-        const dashboardContent = document.getElementById('dashboardContent');
-        const customersContent = document.getElementById('customersContent');
-        const ticketsContent = document.getElementById('ticketsContent');
-        const analyticsContent = document.getElementById('analyticsContent');
-        const settingsContent = document.getElementById('settingsContent');
-
-        function showTab(tab) {
-            dashboardContent.style.display = 'none';
-            customersContent.style.display = 'none';
-            ticketsContent.style.display = 'none';
-            analyticsContent.style.display = 'none';
-            settingsContent.style.display = 'none';
-            if (tab === 'dashboard') dashboardContent.style.display = '';
-            if (tab === 'customers') customersContent.style.display = '';
-            if (tab === 'tickets') ticketsContent.style.display = '';
-            if (tab === 'analytics') analyticsContent.style.display = '';
-            if (tab === 'settings') settingsContent.style.display = '';
-        }
-
+        // --- Tab Switching (ensure Customers tab loads data) ---
         menuItems.forEach((item, idx) => {
             item.addEventListener('click', () => {
                 menuItems.forEach(i => i.classList.remove('active'));
@@ -1305,27 +1092,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             showTab('dashboard');
             updateDashboard();
+            loadCustomers();
             loadTickets();
             updateAnalytics();
         });
-
-        // --- Update dashboard and analytics on load and after changes ---
-        document.addEventListener('DOMContentLoaded', () => {
-            showTab('dashboard');
-            updateDashboard();
-            loadTickets();
-            updateAnalytics();
-        });
-        async function reloadAll() {
-            await loadCustomers();
-            await loadTickets();
-            await updateDashboard();
-            await updateAnalytics();
-        }
-        window.reloadAll = reloadAll;
-
-        // Call reloadAll after customer add/update/delete
-        // Replace loadCustomers() with reloadAll() in your customer CRUD code if you want dashboard to update automatically
     </script>
 </body>
 </html>
