@@ -555,8 +555,9 @@
         // --- API Config ---
         function getApiConfig() {
             return {
-                baseUrl: localStorage.getItem('apiBaseUrl') || 'https://your-api-url.com/api/customers',
-                apiKey: localStorage.getItem('apiKey') || '',
+                // Set Neon Data API base URL
+                baseUrl: localStorage.getItem('apiBaseUrl') || 'https://ep-misty-wind-aedgzzqm.apirest.c-2.us-east-2.aws.neon.tech/neondb/rest/v1',
+                apiKey: localStorage.getItem('apiKey') || '', // <-- JWT token goes here!
                 timeout: parseInt(localStorage.getItem('apiTimeout') || '5000', 10),
                 debug: localStorage.getItem('apiDebug') === 'true',
                 headers: (() => {
