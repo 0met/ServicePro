@@ -344,6 +344,30 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: var(--secondary);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1100;
+            transition: background 0.2s;
+        }
+        .fab:hover {
+            background: #238f68;
+        }
+        
         /* Responsive Styles */
         @media (max-width: 992px) {
             .container {
@@ -431,6 +455,7 @@
                     </div>
                 </div>
             </div>
+            <button class="fab" id="addCustomerFab"><i class="fas fa-plus"></i></button>
         </div>
     </div>
     
@@ -480,6 +505,46 @@
         </div>
     </div>
 
+    <!-- API Settings Modal -->
+    <div class="modal" id="apiSettingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>API Configuration</h3>
+                <span class="close" id="closeApiSettings">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="apiSettingsForm">
+                    <div class="form-group">
+                        <label for="apiUrl">API Base URL</label>
+                        <input type="text" id="apiUrl" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="apiKey">API Key / Token</label>
+                        <input type="text" id="apiKey">
+                    </div>
+                    <div class="form-group">
+                        <label for="apiTimeout">Request Timeout (ms)</label>
+                        <input type="number" id="apiTimeout" min="100" step="100" value="5000">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="apiDebug">
+                            Enable Debug Logging
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="apiHeaders">Custom Headers (JSON)</label>
+                        <textarea id="apiHeaders" rows="3" placeholder='{"X-Custom-Header":"value"}'></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-cancel" id="cancelApiSettings">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification -->
     <div class="notification" id="notification">
         <i class="fas fa-check-circle" id="notificationIcon"></i>
@@ -487,7 +552,30 @@
     </div>
 
     <script>
-        // Modal functionality
+        // --- API Config ---
+        function getApiConfig() {
+            return {
+                baseUrl: localStorage.getItem('apiBaseUrl') || 'https://your-api-url.com/api/customers',
+                apiKey: localStorage.getItem('apiKey') || '',
+                timeout: parseInt(localStorage.getItem('apiTimeout') || '5000', 10),
+                debug: localStorage.getItem('apiDebug') === 'true',
+                headers: (() => {
+                    try {
+                        return JSON.parse(localStorage.getItem('apiHeaders') || '{}');
+                    } catch { return {}; }
+                })()
+            };
+        }
+        function setApiConfig(config) {
+            localStorage.setItem('apiBaseUrl', config.baseUrl);
+            localStorage.setItem('apiKey', config.apiKey);
+            localStorage.setItem('apiTimeout', config.timeout);
+            localStorage.setItem('apiDebug', config.debug);
+            localStorage.setItem('apiHeaders', JSON.stringify(config.headers));
+        }
+        let API_CONFIG = getApiConfig();
+
+        // --- Modal functionality ---
         const modal = document.getElementById('addCustomerModal');
         const addCustomerBtn = document.getElementById('addCustomerBtn');
         const cancelBtn = document.getElementById('cancelBtn');
@@ -502,13 +590,9 @@
         const modalTitle = document.getElementById('modalTitle');
         const customerIdField = document.getElementById('customerId');
         const submitBtn = document.getElementById('submitBtn');
-        
-        let allCustomers = [];
-        let currentEditingId = null;
-        
-        // API Base URL - Update this to your Netlify functions URL
-        const API_BASE = '/.netlify/functions';
-        
+
+        let editingCustomerId = null;
+
         // Show notification
         function showNotification(message, isSuccess = true) {
             notification.className = isSuccess ? 
@@ -516,156 +600,207 @@
             notificationIcon.className = isSuccess ? 
                 'fas fa-check-circle' : 'fas fa-exclamation-circle';
             notificationMessage.textContent = message;
-            
             setTimeout(() => {
                 notification.className = 'notification';
             }, 3000);
         }
-        
+
         // Show loading state
         function setLoading(isLoading) {
-            if (isLoading) {
-                loadingSpinner.style.display = 'block';
-            } else {
-                loadingSpinner.style.display = 'none';
-            }
+            loadingSpinner.style.display = isLoading ? 'block' : 'none';
         }
-        
+
         // Open modal for adding or editing
         function openModal(isEditing = false) {
             modal.style.display = 'flex';
             modalTitle.textContent = isEditing ? 'Edit Customer' : 'Add New Customer';
             submitBtn.textContent = isEditing ? 'Update Customer' : 'Save Customer';
-            
             if (!isEditing) {
                 customerForm.reset();
                 customerIdField.value = '';
             }
         }
-        
         addCustomerBtn.addEventListener('click', () => openModal(false));
-        
+        document.getElementById('addCustomerFab').addEventListener('click', () => openModal(false));
+
         // Close modal
         const closeModal = () => {
             modal.style.display = 'none';
-            currentEditingId = null;
+            editingCustomerId = null;
         };
-        
         cancelBtn.addEventListener('click', closeModal);
         closeBtn.addEventListener('click', closeModal);
-        
-        // Close modal when clicking outside
         window.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                closeModal();
-            }
+            if (event.target === modal) closeModal();
         });
-        
-        // Form submission
+
+        // --- Form Validation & Submit ---
         customerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            if (!name || !email) {
+                showNotification('Name and Email are required.', false);
+                return;
+            }
             const customerData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
+                name,
+                email,
                 phone: document.getElementById('phone').value,
                 company: document.getElementById('company').value,
                 status: document.getElementById('status').value,
                 notes: document.getElementById('notes').value
             };
-            
-            const id = customerIdField.value;
-            
+            setLoading(true);
             try {
-                setLoading(true);
-                let response;
-                
-                if (id) {
-                    // Update existing customer
-                    response = await updateCustomerInDatabase(id, customerData);
+                if (customerIdField.value) {
+                    await updateCustomerInDatabase(customerIdField.value, customerData);
+                    showNotification('Customer updated successfully!');
                 } else {
-                    // Create new customer
-                    response = await saveCustomerToDatabase(customerData);
+                    await saveCustomerToDatabase(customerData);
+                    showNotification('Customer saved successfully!');
                 }
-                
-                if (response.success) {
-                    showNotification(`Customer ${id ? 'updated' : 'saved'} successfully!`);
-                    closeModal();
-                    loadCustomers(); // Refresh the customer list
-                } else {
-                    showNotification('Error saving customer: ' + response.message, false);
-                }
+                closeModal();
+                loadCustomers(searchInput.value);
             } catch (error) {
                 showNotification('Error saving customer: ' + error.message, false);
             } finally {
                 setLoading(false);
             }
         });
-        
-        // Database functions - these will call your Netlify functions
-        async function saveCustomerToDatabase(customerData) {
+
+        // --- API Settings Modal Logic ---
+        const apiSettingsModal = document.getElementById('apiSettingsModal');
+        const openApiSettingsBtn = document.createElement('li');
+        openApiSettingsBtn.className = 'menu-item';
+        openApiSettingsBtn.innerHTML = '<i class="fas fa-link"></i> API Settings';
+        document.querySelector('.menu').appendChild(openApiSettingsBtn);
+
+        const closeApiSettings = document.getElementById('closeApiSettings');
+        const cancelApiSettings = document.getElementById('cancelApiSettings');
+        const apiSettingsForm = document.getElementById('apiSettingsForm');
+        const apiUrlInput = document.getElementById('apiUrl');
+        const apiKeyInput = document.getElementById('apiKey');
+        const apiTimeoutInput = document.getElementById('apiTimeout');
+        const apiDebugInput = document.getElementById('apiDebug');
+        const apiHeadersInput = document.getElementById('apiHeaders');
+
+        openApiSettingsBtn.addEventListener('click', () => {
+            apiSettingsModal.style.display = 'flex';
+            const config = getApiConfig();
+            apiUrlInput.value = config.baseUrl;
+            apiKeyInput.value = config.apiKey;
+            apiTimeoutInput.value = config.timeout;
+            apiDebugInput.checked = config.debug;
+            apiHeadersInput.value = JSON.stringify(config.headers, null, 2);
+        });
+        closeApiSettings.addEventListener('click', () => {
+            apiSettingsModal.style.display = 'none';
+        });
+        cancelApiSettings.addEventListener('click', () => {
+            apiSettingsModal.style.display = 'none';
+        });
+        window.addEventListener('click', (event) => {
+            if (event.target === apiSettingsModal) apiSettingsModal.style.display = 'none';
+        });
+        apiSettingsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            let headers = {};
             try {
-                const response = await fetch(`${API_BASE}/create-customer`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(customerData),
-                });
-                
-                return await response.json();
-            } catch (error) {
-                console.error('Error saving customer:', error);
-                return { success: false, message: error.message };
+                headers = JSON.parse(apiHeadersInput.value || '{}');
+            } catch {
+                showNotification('Invalid JSON in custom headers', false);
+                return;
             }
-        }
-        
-        async function updateCustomerInDatabase(id, customerData) {
-            try {
-                const response = await fetch(`${API_BASE}/update-customer`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ id, ...customerData }),
-                });
-                
-                return await response.json();
-            } catch (error) {
-                console.error('Error updating customer:', error);
-                return { success: false, message: error.message };
+            setApiConfig({
+                baseUrl: apiUrlInput.value.trim(),
+                apiKey: apiKeyInput.value.trim(),
+                timeout: parseInt(apiTimeoutInput.value, 10),
+                debug: apiDebugInput.checked,
+                headers
+            });
+            API_CONFIG = getApiConfig();
+            apiSettingsModal.style.display = 'none';
+            showNotification('API configuration updated!', true);
+            loadCustomers(searchInput.value);
+        });
+
+        // --- API CRUD Functions ---
+        async function apiFetch(url, options = {}) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+
+            options.headers = {
+                'Content-Type': 'application/json',
+                ...API_CONFIG.headers
+            };
+            if (API_CONFIG.apiKey) {
+                options.headers['Authorization'] = `Bearer ${API_CONFIG.apiKey}`;
             }
-        }
-        
-        async function loadCustomers() {
-            setLoading(true);
-            
+            options.signal = controller.signal;
+
+            if (API_CONFIG.debug) {
+                console.log('API Request:', url, options);
+            }
+
             try {
-                const response = await fetch(`${API_BASE}/get-customers`);
-                const result = await response.json();
-                
-                if (result.success) {
-                    allCustomers = result.data;
-                    displayCustomers(allCustomers);
-                } else {
-                    showNotification('Error loading customers: ' + result.message, false);
+                const response = await fetch(url, options);
+                clearTimeout(timeoutId);
+                if (API_CONFIG.debug) {
+                    console.log('API Response:', response);
                 }
+                if (!response.ok) throw new Error(await response.text());
+                return await response.json();
+            } catch (err) {
+                if (API_CONFIG.debug) {
+                    console.error('API Error:', err);
+                }
+                throw err;
+            }
+        }
+
+        async function saveCustomerToDatabase(customerData) {
+            return await apiFetch(API_CONFIG.baseUrl, {
+                method: 'POST',
+                body: JSON.stringify(customerData)
+            });
+        }
+        async function updateCustomerInDatabase(id, customerData) {
+            return await apiFetch(`${API_CONFIG.baseUrl}/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(customerData)
+            });
+        }
+        async function deleteCustomerFromDatabase(id) {
+            return await apiFetch(`${API_CONFIG.baseUrl}/${id}`, {
+                method: 'DELETE'
+            });
+        }
+        async function fetchCustomers(filter = '') {
+            let url = API_CONFIG.baseUrl;
+            if (filter) url += `?search=${encodeURIComponent(filter)}`;
+            return await apiFetch(url, { method: 'GET' });
+        }
+
+        // --- API Load and Display ---
+        async function loadCustomers(filter = '') {
+            setLoading(true);
+            try {
+                const customers = await fetchCustomers(filter);
+                displayCustomers(customers);
             } catch (error) {
-                console.error('Error loading customers:', error);
                 showNotification('Error loading customers', false);
             } finally {
                 setLoading(false);
             }
         }
-        
+
         function displayCustomers(customers) {
             customersContainer.innerHTML = '';
-            
-            if (customers.length === 0) {
+            if (!customers || customers.length === 0) {
                 customersContainer.innerHTML = '<div class="customer-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5;">No customers found</div></div>';
                 return;
             }
-            
             customers.forEach(customer => {
                 const row = document.createElement('div');
                 row.className = 'customer-row';
@@ -673,7 +808,7 @@
                     <div>${customer.name}</div>
                     <div>${customer.email}</div>
                     <div>${customer.phone || 'N/A'}</div>
-                    <div><span class="status status-${customer.status}">${customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}</span></div>
+                    <div><span class="status status-${customer.status}">${customer.status ? customer.status.charAt(0).toUpperCase() + customer.status.slice(1) : ''}</span></div>
                     <div class="actions">
                         <button class="action-btn edit-btn" data-id="${customer.id}"><i class="fas fa-edit"></i></button>
                         <button class="action-btn delete-btn" data-id="${customer.id}"><i class="fas fa-trash"></i></button>
@@ -681,86 +816,58 @@
                 `;
                 customersContainer.appendChild(row);
             });
-            
-            // Add event listeners to action buttons
             document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
+                btn.addEventListener('click', async () => {
                     const customerId = btn.getAttribute('data-id');
-                    editCustomer(customerId);
+                    await editCustomer(customerId);
                 });
             });
-            
             document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
+                btn.addEventListener('click', async () => {
                     const customerId = btn.getAttribute('data-id');
-                    deleteCustomer(customerId);
+                    if (!confirm('Are you sure you want to delete this customer?')) return;
+                    try {
+                        await deleteCustomerFromDatabase(customerId);
+                        showNotification('Customer deleted successfully');
+                        loadCustomers(searchInput.value);
+                    } catch (error) {
+                        showNotification('Error deleting customer', false);
+                    }
                 });
             });
         }
-        
-        function editCustomer(customerId) {
-            const customer = allCustomers.find(c => c.id === customerId);
-            if (!customer) return;
-            
-            // Populate the form with customer data
-            document.getElementById('name').value = customer.name;
-            document.getElementById('email').value = customer.email;
-            document.getElementById('phone').value = customer.phone || '';
-            document.getElementById('company').value = customer.company || '';
-            document.getElementById('status').value = customer.status;
-            document.getElementById('notes').value = customer.notes || '';
-            customerIdField.value = customerId;
-            
-            openModal(true);
-        }
-        
-        async function deleteCustomer(customerId) {
-            if (!confirm('Are you sure you want to delete this customer?')) {
-                return;
-            }
-            
+
+        async function editCustomer(customerId) {
+            setLoading(true);
             try {
-                const response = await fetch(`${API_BASE}/delete-customer`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ id: customerId }),
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showNotification('Customer deleted successfully');
-                    loadCustomers(); // Refresh the customer list
-                } else {
-                    showNotification('Error deleting customer: ' + result.message, false);
-                }
+                const response = await fetch(`${API_BASE_URL}/${customerId}`);
+                if (!response.ok) throw new Error('Failed to fetch customer');
+                const customer = await response.json();
+                editingCustomerId = customerId;
+                modal.style.display = 'flex';
+                modalTitle.textContent = 'Edit Customer';
+                submitBtn.textContent = 'Update Customer';
+                document.getElementById('name').value = customer.name || '';
+                document.getElementById('email').value = customer.email || '';
+                document.getElementById('phone').value = customer.phone || '';
+                document.getElementById('company').value = customer.company || '';
+                document.getElementById('status').value = customer.status || 'active';
+                document.getElementById('notes').value = customer.notes || '';
+                customerIdField.value = customerId;
             } catch (error) {
-                console.error('Error deleting customer:', error);
-                showNotification('Error deleting customer', false);
+                showNotification('Error loading customer', false);
+            } finally {
+                setLoading(false);
             }
         }
-        
-        // Search functionality
-        searchInput.addEventListener('input', () => {
-            const searchTerm = searchInput.value.toLowerCase();
-            
-            if (searchTerm) {
-                const filteredCustomers = allCustomers.filter(customer => 
-                    customer.name.toLowerCase().includes(searchTerm) ||
-                    customer.email.toLowerCase().includes(searchTerm) ||
-                    (customer.company && customer.company.toLowerCase().includes(searchTerm))
-                );
-                
-                displayCustomers(filteredCustomers);
-            } else {
-                displayCustomers(allCustomers);
-            }
+
+        // --- Search functionality ---
+        searchInput.addEventListener('input', (e) => {
+            loadCustomers(e.target.value);
         });
-        
+
         // Load customers when page loads
-        document.addEventListener('DOMContentLoaded', loadCustomers);
+        document.addEventListener('DOMContentLoaded', () => loadCustomers());
     </script>
 </body>
 </html>
