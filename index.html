@@ -725,61 +725,78 @@
             loadCustomers(searchInput.value);
         });
 
-        // --- API CRUD Functions ---
-        async function apiFetch(url, options = {}) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+        // --- API CRUD Functions for Neon Data API ---
+        const CUSTOMERS_TABLE = 'customers';
 
-            options.headers = {
-                'Content-Type': 'application/json',
-                ...API_CONFIG.headers
-            };
-            if (API_CONFIG.apiKey) {
-                options.headers['Authorization'] = `Bearer ${API_CONFIG.apiKey}`;
-            }
-            options.signal = controller.signal;
-
-            if (API_CONFIG.debug) {
-                console.log('API Request:', url, options);
-            }
-
-            try {
-                const response = await fetch(url, options);
-                clearTimeout(timeoutId);
-                if (API_CONFIG.debug) {
-                    console.log('API Response:', response);
-                }
-                if (!response.ok) throw new Error(await response.text());
-                return await response.json();
-            } catch (err) {
-                if (API_CONFIG.debug) {
-                    console.error('API Error:', err);
-                }
-                throw err;
-            }
+        // Helper to build Neon API URLs
+        function neonUrl(path) {
+            return `${API_CONFIG.baseUrl}${path}`;
         }
 
-        async function saveCustomerToDatabase(customerData) {
-            return await apiFetch(API_CONFIG.baseUrl, {
-                method: 'POST',
-                body: JSON.stringify(customerData)
-            });
-        }
-        async function updateCustomerInDatabase(id, customerData) {
-            return await apiFetch(`${API_CONFIG.baseUrl}/${id}`, {
-                method: 'PUT',
-                body: JSON.stringify(customerData)
-            });
-        }
-        async function deleteCustomerFromDatabase(id) {
-            return await apiFetch(`${API_CONFIG.baseUrl}/${id}`, {
-                method: 'DELETE'
-            });
-        }
+        // Fetch all customers
         async function fetchCustomers(filter = '') {
-            let url = API_CONFIG.baseUrl;
-            if (filter) url += `?search=${encodeURIComponent(filter)}`;
-            return await apiFetch(url, { method: 'GET' });
+            let url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows`);
+            if (filter) {
+                // Neon Data API supports filtering via query params, but you may need to filter client-side
+                // For advanced filtering, see Neon docs
+            }
+            const result = await apiFetch(url, { method: 'GET' });
+            // Neon returns { rows: [...] }
+            return result.rows || [];
+        }
+
+        // Add a customer
+        async function saveCustomerToDatabase(customerData) {
+            const url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows`);
+            // Neon expects { row: { ... } }
+            const result = await apiFetch(url, {
+                method: 'POST',
+                body: JSON.stringify({ row: customerData })
+            });
+            return result;
+        }
+
+        // Update a customer
+        async function updateCustomerInDatabase(id, customerData) {
+            const url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows/${id}`);
+            // Neon expects { row: { ... } }
+            const result = await apiFetch(url, {
+                method: 'PATCH',
+                body: JSON.stringify({ row: customerData })
+            });
+            return result;
+        }
+
+        // Delete a customer
+        async function deleteCustomerFromDatabase(id) {
+            const url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows/${id}`);
+            const result = await apiFetch(url, { method: 'DELETE' });
+            return result;
+        }
+
+        // Fetch a single customer for editing
+        async function editCustomer(customerId) {
+            setLoading(true);
+            try {
+                const url = neonUrl(`/tables/${CUSTOMERS_TABLE}/rows/${customerId}`);
+                const result = await apiFetch(url, { method: 'GET' });
+                const customer = result.row || {};
+                editingCustomerId = customerId;
+                modal.style.display = 'flex';
+                modalTitle.textContent = 'Edit Customer';
+                submitBtn.textContent = 'Update Customer';
+                document.getElementById('name').value = customer.name || '';
+                document.getElementById('email').value = customer.email || '';
+                document.getElementById('phone').value = customer.phone || '';
+                document.getElementById('company').value = customer.company || '';
+                document.getElementById('status').value = customer.status || 'active';
+                document.getElementById('notes').value = customer.notes || '';
+                customerIdField.value = customerId;
+            } catch (error) {
+                showNotification('Error loading customer', false);
+            } finally {
+                setLoading(false);
+            }
         }
 
         // --- API Load and Display ---
@@ -835,30 +852,6 @@
                     }
                 });
             });
-        }
-
-        async function editCustomer(customerId) {
-            setLoading(true);
-            try {
-                const response = await fetch(`${API_BASE_URL}/${customerId}`);
-                if (!response.ok) throw new Error('Failed to fetch customer');
-                const customer = await response.json();
-                editingCustomerId = customerId;
-                modal.style.display = 'flex';
-                modalTitle.textContent = 'Edit Customer';
-                submitBtn.textContent = 'Update Customer';
-                document.getElementById('name').value = customer.name || '';
-                document.getElementById('email').value = customer.email || '';
-                document.getElementById('phone').value = customer.phone || '';
-                document.getElementById('company').value = customer.company || '';
-                document.getElementById('status').value = customer.status || 'active';
-                document.getElementById('notes').value = customer.notes || '';
-                customerIdField.value = customerId;
-            } catch (error) {
-                showNotification('Error loading customer', false);
-            } finally {
-                setLoading(false);
-            }
         }
 
         // --- Search functionality ---
