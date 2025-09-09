@@ -6,7 +6,6 @@
     <title>ServicePro - Complete CRM System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Your existing CSS remains the same */
         :root {
             --primary: #03363D;
             --secondary: #2D9D78;
@@ -24,17 +23,984 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* ... rest of your CSS ... */
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: var(--primary);
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo span {
+            color: var(--secondary);
+        }
+        
+        .menu {
+            list-style: none;
+        }
+        
+        .menu-item {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--secondary);
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header Styles */
+        .header {
+            background-color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--light);
+            border-radius: 20px;
+            padding: 8px 15px;
+            width: 300px;
+        }
+        
+        .search-bar input {
+            border: none;
+            background: transparent;
+            margin-left: 10px;
+            width: 100%;
+            outline: none;
+        }
+        
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        /* Content Area Styles */
+        .content {
+            padding: 30px;
+            flex: 1;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #238f68;
+        }
+        
+        .btn-secondary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #02252a;
+        }
+        
+        /* List Styles */
+        .customer-list, .ticket-list, .user-list, .team-list {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .list-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 0.5fr;
+            padding: 15px 20px;
+            background-color: var(--light);
+            font-weight: 600;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .ticket-header {
+            grid-template-columns: 1fr 1fr 1fr 1fr 0.5fr;
+        }
+        
+        .user-header {
+            grid-template-columns: 1fr 1fr 1fr 0.5fr;
+        }
+        
+        .team-header {
+            grid-template-columns: 1fr 1fr 0.5fr;
+        }
+        
+        .customer-row, .ticket-row, .user-row, .team-row {
+            display: grid;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--light-gray);
+            align-items: center;
+        }
+        
+        .customer-row {
+            grid-template-columns: 1fr 1fr 1fr 1fr 0.5fr;
+        }
+        
+        .ticket-row {
+            grid-template-columns: 1fr 1fr 1fr 1fr 0.5fr;
+        }
+        
+        .user-row {
+            grid-template-columns: 1fr 1fr 1fr 0.5fr;
+        }
+        
+        .team-row {
+            grid-template-columns: 1fr 1fr 0.5fr;
+        }
+        
+        .customer-row:hover, .ticket-row:hover, .user-row:hover, .team-row:hover {
+            background-color: #f9fafb;
+        }
+        
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .status-active {
+            background-color: #DEF7EC;
+            color: #03543F;
+        }
+        
+        .status-inactive {
+            background-color: #FDE8E8;
+            color: #9B1C1C;
+        }
+        
+        .status-open {
+            background-color: #DBEAFE;
+            color: #1E40AF;
+        }
+        
+        .status-pending {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        
+        .status-closed {
+            background-color: #E5E7EB;
+            color: #374151;
+        }
+        
+        .priority-high {
+            background-color: #FEE2E2;
+            color: #B91C1C;
+        }
+        
+        .priority-medium {
+            background-color: #FEF3C7;
+            color: #B45309;
+        }
+        
+        .priority-low {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        .action-btn:hover {
+            color: var(--primary);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--light-gray);
+            border-radius: 4px;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-cancel {
+            background-color: var(--light);
+            color: var(--gray);
+        }
+        
+        .btn-cancel:hover {
+            background-color: var(--light-gray);
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 4px;
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .notification.success {
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .notification.error {
+            border-left: 4px solid var(--accent);
+        }
+        
+        .notification.info {
+            border-left: 4px solid var(--primary);
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid var(--light-gray);
+            border-top: 3px solid var(--secondary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: var(--secondary);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1100;
+            transition: background 0.2s;
+        }
+        .fab:hover {
+            background: #238f68;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .menu-item {
+                padding: 10px 15px;
+            }
+            
+            .list-header, .customer-row, .ticket-row, .user-row, .team-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .hidden-mobile {
+                display: none;
+            }
+        }
+
+        /* API Status Indicator */
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-right: 20px;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-connected {
+            background-color: var(--secondary);
+        }
+        
+        .status-disconnected {
+            background-color: var(--accent);
+        }
+        
+        /* Ticket Details */
+        .ticket-details {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            width: 120px;
+            color: var(--gray);
+        }
+        
+        .detail-value {
+            flex: 1;
+        }
+        
+        /* Comments Section */
+        .comments-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .comment {
+            border-bottom: 1px solid var(--light-gray);
+            padding: 15px 0;
+        }
+        
+        .comment:last-child {
+            border-bottom: none;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .comment-author {
+            font-weight: 600;
+        }
+        
+        .comment-date {
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .comment-text {
+            line-height: 1.5;
+        }
+        
+        .add-comment {
+            margin-top: 20px;
+        }
+        
+        /* WebSocket Status */
+        .websocket-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-right: 15px;
+        }
     </style>
 </head>
 <body>
-    <!-- Your HTML structure remains the same -->
     <div class="container">
-        <!-- Sidebar, header, and content areas -->
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1><i class="fas fa-headset"></i> Service<span>Pro</span></h1>
+            </div>
+            <ul class="menu">
+                <li class="menu-item active" data-tab="dashboard"><i class="fas fa-home"></i> Dashboard</li>
+                <li class="menu-item" data-tab="customers"><i class="fas fa-users"></i> Customers</li>
+                <li class="menu-item" data-tab="tickets"><i class="fas fa-ticket-alt"></i> Tickets</li>
+                <li class="menu-item" data-tab="teams"><i class="fas fa-users"></i> Teams</li>
+                <li class="menu-item" data-tab="users"><i class="fas fa-user"></i> Users</li>
+                <li class="menu-item" data-tab="analytics"><i class="fas fa-chart-bar"></i> Analytics</li>
+                <li class="menu-item" data-tab="settings"><i class="fas fa-cog"></i> Settings</li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search..." id="searchInput">
+                </div>
+                <div class="user-actions">
+                    <div class="api-status">
+                        <span class="status-indicator" id="apiStatusIndicator"></span>
+                        <span id="apiStatusText">Checking connection...</span>
+                    </div>
+                    <div class="websocket-status">
+                        <span class="status-indicator" id="wsStatusIndicator"></span>
+                        <span id="wsStatusText">WebSocket</span>
+                    </div>
+                    <i class="fas fa-bell"></i>
+                    <div class="user-profile">
+                        <div class="avatar">JD</div>
+                        <span>John Doe</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="content" id="dashboardContent">
+                <div class="dashboard-header">
+                    <h2>Dashboard Overview</h2>
+                </div>
+                <div style="display: flex; gap: 30px; margin-bottom: 30px;">
+                    <div style="background: var(--light); border-radius: 8px; padding: 20px; flex: 1; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: var(--secondary); margin-bottom: 10px;"><i class="fas fa-users"></i> Customers</h3>
+                        <div id="dashboardCustomerCount" style="font-size: 2em; font-weight: bold;">0</div>
+                    </div>
+                    <div style="background: var(--light); border-radius: 8px; padding: 20px; flex: 1; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: var(--secondary); margin-bottom: 10px;"><i class="fas fa-ticket-alt"></i> Tickets</h3>
+                        <div id="dashboardTicketCount" style="font-size: 2em; font-weight: bold;">0</div>
+                    </div>
+                    <div style="background: var(--light); border-radius: 8px; padding: 20px; flex: 1; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: var(--secondary); margin-bottom: 10px;"><i class="fas fa-user"></i> Agents</h3>
+                        <div id="dashboardAgentCount" style="font-size: 2em; font-weight: bold;">0</div>
+                    </div>
+                    <div style="background: var(--light); border-radius: 8px; padding: 20px; flex: 1; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: var(--secondary); margin-bottom: 10px;"><i class="fas fa-users"></i> Teams</h3>
+                        <div id="dashboardTeamCount" style="font-size: 2em; font-weight: bold;">0</div>
+                    </div>
+                </div>
+                <div>
+                    <h3>Recent Activity</h3>
+                    <ul id="dashboardRecentActivity" style="margin-top: 10px; color: var(--gray);"></ul>
+                </div>
+            </div>
+
+            <!-- Customers Content -->
+            <div class="content" id="customersContent" style="display:none;">
+                <div class="dashboard-header">
+                    <h2>Customer Management</h2>
+                    <button class="btn btn-primary" id="addCustomerBtn"><i class="fas fa-plus"></i> Add Customer</button>
+                </div>
+                <!-- Customer List -->
+                <div class="customer-list">
+                    <div class="list-header">
+                        <div>Name</div>
+                        <div>Email</div>
+                        <div>Phone</div>
+                        <div>Status</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="customersContainer">
+                        <div class="spinner" id="loadingSpinner"></div>
+                    </div>
+                </div>
+                <button class="fab" id="addCustomerFab"><i class="fas fa-plus"></i></button>
+            </div>
+
+            <!-- Tickets Content -->
+            <div class="content" id="ticketsContent" style="display:none;">
+                <div class="dashboard-header">
+                    <h2>Ticket Management</h2>
+                    <button class="btn btn-primary" id="addTicketBtn"><i class="fas fa-plus"></i> Add Ticket</button>
+                </div>
+                <!-- Ticket List -->
+                <div class="ticket-list">
+                    <div class="list-header ticket-header">
+                        <div>Title</div>
+                        <div>Customer</div>
+                        <div>Status</div>
+                        <div>Priority</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="ticketsContainer">
+                        <div class="spinner" id="loadingTicketsSpinner"></div>
+                    </div>
+                </div>
+                <button class="fab" id="addTicketFab"><i class="fas fa-plus"></i></button>
+            </div>
+
+            <!-- Teams Content -->
+            <div class="content" id="teamsContent" style="display:none;">
+                <div class="dashboard-header">
+                    <h2>Team Management</h2>
+                    <button class="btn btn-primary" id="addTeamBtn"><i class="fas fa-plus"></i> Add Team</button>
+                </div>
+                <!-- Team List -->
+                <div class="team-list">
+                    <div class="list-header team-header">
+                        <div>Name</div>
+                        <div>Description</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="teamsContainer">
+                        <div class="spinner" id="loadingTeamsSpinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Content -->
+            <div class="content" id="usersContent" style="display:none;">
+                <div class="dashboard-header">
+                    <h2>User Management</h2>
+                    <button class="btn btn-primary" id="addUserBtn"><i class="fas fa-plus"></i> Add User</button>
+                </div>
+                <!-- User List -->
+                <div class="user-list">
+                    <div class="list-header user-header">
+                        <div>Name</div>
+                        <div>Email</div>
+                        <div>Role</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="usersContainer">
+                        <div class="spinner" id="loadingUsersSpinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Content -->
+            <div class="content" id="analyticsContent" style="display:none;">
+                <div class="dashboard-header">
+                    <h2>Analytics</h2>
+                </div>
+                <div style="display: flex; gap: 30px; margin-bottom: 30px;">
+                    <div style="background: white; border-radius: 8px; padding: 20px; flex: 1; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: var(--secondary); margin-bottom: 10px;">Tickets by Status</h3>
+                        <canvas id="ticketStatusChart" width="400" height="300"></canvas>
+                    </div>
+                    <div style="background: white; border-radius: 8px; padding: 20px; flex: 1; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: var(--secondary); margin-bottom: 10px;">Tickets by Priority</h3>
+                        <canvas id="ticketPriorityChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="content" id="settingsContent" style="display:none;">
+                <div class="dashboard-header">
+                    <h2>Settings</h2>
+                </div>
+                <div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <h3 style="margin-bottom: 20px;">System Configuration</h3>
+                    <div class="form-group">
+                        <label for="apiUrl">API Base URL</label>
+                        <input type="text" id="apiUrl" value="http://localhost:3001/api" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="websocketUrl">WebSocket URL</label>
+                        <input type="text" id="websocketUrl" value="ws://localhost:3002" class="form-control">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
-    <!-- All your modals -->
-    
+    <!-- Add Customer Modal -->
+    <div class="modal" id="addCustomerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalCustomerTitle">Add New Customer</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="customerForm">
+                    <input type="hidden" id="customerId">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="company">Company</label>
+                        <input type="text" id="company">
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-cancel" id="cancelCustomerBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="submitCustomerBtn">Save Customer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Ticket Modal -->
+    <div class="modal" id="addTicketModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTicketTitle">Add New Ticket</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="ticketForm">
+                    <input type="hidden" id="ticketId">
+                    <div class="form-group">
+                        <label for="ticketTitle">Title *</label>
+                        <input type="text" id="ticketTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticketDescription">Description *</label>
+                        <textarea id="ticketDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticketCustomer">Customer *</label>
+                        <select id="ticketCustomer" required>
+                            <option value="">Select a customer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticketStatus">Status</label>
+                        <select id="ticketStatus">
+                            <option value="open">Open</option>
+                            <option value="pending">Pending</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticketPriority">Priority</label>
+                        <select id="ticketPriority">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticketAgent">Assigned Agent</label>
+                        <select id="ticketAgent">
+                            <option value="">Unassigned</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-cancel" id="cancelTicketBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="submitTicketBtn">Save Ticket</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Ticket Modal -->
+    <div class="modal" id="viewTicketModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="viewTicketTitle">Ticket Details</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="ticket-details">
+                    <div class="detail-row">
+                        <div class="detail-label">Status:</div>
+                        <div class="detail-value"><span class="status" id="viewTicketStatus">Open</span></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Priority:</div>
+                        <div class="detail-value"><span class="status" id="viewTicketPriority">Medium</span></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Customer:</div>
+                        <div class="detail-value" id="viewTicketCustomer">John Doe</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Assigned To:</div>
+                        <div class="detail-value" id="viewTicketAgent">Unassigned</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Created:</div>
+                        <div class="detail-value" id="viewTicketCreated">2023-06-15</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Description:</div>
+                        <div class="detail-value" id="viewTicketDescription">No description provided.</div>
+                    </div>
+                </div>
+
+                <div class="comments-section">
+                    <h4>Comments</h4>
+                    <div id="ticketComments">
+                        <div class="comment">
+                            <div class="comment-header">
+                                <div class="comment-author">System</div>
+                                <div class="comment-date">2023-06-15 10:30 AM</div>
+                            </div>
+                            <div class="comment-text">Ticket was created</div>
+                        </div>
+                    </div>
+
+                    <div class="add-comment">
+                        <div class="form-group">
+                            <label for="newComment">Add Comment</label>
+                            <textarea id="newComment" rows="3" placeholder="Type your comment here..."></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primary" id="addCommentBtn">Add Comment</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Team Modal -->
+    <div class="modal" id="addTeamModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTeamTitle">Add New Team</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="teamForm">
+                    <input type="hidden" id="teamId">
+                    <div class="form-group">
+                        <label for="teamName">Team Name *</label>
+                        <input type="text" id="teamName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="teamDescription">Description</label>
+                        <textarea id="teamDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="teamMembers">Team Members</label>
+                        <select id="teamMembers" multiple>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-cancel" id="cancelTeamBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="submitTeamBtn">Save Team</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal" id="addUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalUserTitle">Add New User</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    <div class="form-group">
+                        <label for="userName">Full Name *</label>
+                        <input type="text" id="userName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">Email Address *</label>
+                        <input type="email" id="userEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userRole">Role *</label>
+                        <select id="userRole" required>
+                            <option value="agent">Agent</option>
+                            <option value="admin">Admin</option>
+                            <option value="manager">Manager</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="userStatus">Status</label>
+                        <select id="userStatus">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-cancel" id="cancelUserBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="submitUserBtn">Save User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification -->
     <div class="notification" id="notification">
         <i class="fas fa-check-circle" id="notificationIcon"></i>
@@ -45,35 +1011,54 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // --- API Config for Production ---
-        // These will be set based on environment
-        let API_BASE_URL, WS_URL;
+        // --- API Config ---
+        let API_BASE_URL = localStorage.getItem('apiUrl') || 'http://localhost:3001/api';
+        let WS_URL = localStorage.getItem('websocketUrl') || 'ws://localhost:3002';
         let socket = null;
-        
-        // Set configuration based on environment
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            // Local development
-            API_BASE_URL = 'http://localhost:3001/api';
-            WS_URL = 'ws://localhost:3002';
-        } else {
-            // Production - replace with your actual backend URLs
-            API_BASE_URL = 'https://your-backend.herokuapp.com/api';
-            WS_URL = 'wss://your-backend.herokuapp.com'; // Note: wss for secure WebSocket
-        }
 
         // Show notification
         function showNotification(message, isSuccess = true) {
-            // ... your existing notification code ...
+            const notification = document.getElementById('notification');
+            const notificationIcon = document.getElementById('notificationIcon');
+            const notificationMessage = document.getElementById('notificationMessage');
+            
+            notification.className = isSuccess ? 
+                'notification success show' : 'notification error show';
+            notificationIcon.className = isSuccess ? 
+                'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            notificationMessage.textContent = message;
+            
+            setTimeout(() => {
+                notification.className = 'notification';
+            }, 3000);
         }
 
         // Update API connection status
         function updateApiStatus(isConnected, message) {
-            // ... your existing status code ...
+            const indicator = document.getElementById('apiStatusIndicator');
+            const statusText = document.getElementById('apiStatusText');
+            
+            if (isConnected) {
+                indicator.className = 'status-indicator status-connected';
+                statusText.textContent = message || 'Connected to Backend API';
+            } else {
+                indicator.className = 'status-indicator status-disconnected';
+                statusText.textContent = message || 'Disconnected from Backend API';
+            }
         }
 
         // Update WebSocket connection status
         function updateWebSocketStatus(isConnected, message) {
-            // ... your existing WebSocket status code ...
+            const indicator = document.getElementById('wsStatusIndicator');
+            const statusText = document.getElementById('wsStatusText');
+            
+            if (isConnected) {
+                indicator.className = 'status-indicator status-connected';
+                statusText.textContent = message || 'WebSocket Connected';
+            } else {
+                indicator.className = 'status-indicator status-disconnected';
+                statusText.textContent = message || 'WebSocket Disconnected';
+            }
         }
 
         // Initialize WebSocket connection
@@ -175,15 +1160,1019 @@
             }
         }
 
-        // ... rest of your JavaScript functions ...
+        // Test API connection
+        async function testApiConnection() {
+            try {
+                updateApiStatus(false, 'Testing connection...');
+                
+                // Try to get customers to test the connection
+                await apiRequest('/customers');
+                
+                updateApiStatus(true, 'Connected to Backend API');
+                return true;
+            } catch (error) {
+                updateApiStatus(false, 'Connection failed: ' + error.message);
+                showNotification('Backend API connection failed. Make sure your server is running on port 3001.', false);
+                return false;
+            }
+        }
+
+        // Setup search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout = null;
+            
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const searchTerm = e.target.value.trim().toLowerCase();
+                
+                if (searchTerm.length === 0) {
+                    // If search is empty, reload all data
+                    const activeTab = document.querySelector('.menu-item.active').getAttribute('data-tab');
+                    if (activeTab === 'customers') loadCustomers();
+                    if (activeTab === 'tickets') loadTickets();
+                    if (activeTab === 'users') loadUsers();
+                    if (activeTab === 'teams') loadTeams();
+                    return;
+                }
+                
+                searchTimeout = setTimeout(() => {
+                    const activeTab = document.querySelector('.menu-item.active').getAttribute('data-tab');
+                    
+                    if (activeTab === 'customers') {
+                        // Filter customers
+                        const customersContainer = document.getElementById('customersContainer');
+                        const allCustomerRows = customersContainer.querySelectorAll('.customer-row');
+                        
+                        allCustomerRows.forEach(row => {
+                            const name = row.querySelector('div:nth-child(1)').textContent.toLowerCase();
+                            const email = row.querySelector('div:nth-child(2)').textContent.toLowerCase();
+                            const phone = row.querySelector('div:nth-child(3)').textContent.toLowerCase();
+                            
+                            if (name.includes(searchTerm) || email.includes(searchTerm) || phone.includes(searchTerm)) {
+                                row.style.display = 'grid';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                    }
+                    
+                    if (activeTab === 'tickets') {
+                        // Filter tickets
+                        const ticketsContainer = document.getElementById('ticketsContainer');
+                        const allTicketRows = ticketsContainer.querySelectorAll('.ticket-row');
+                        
+                        allTicketRows.forEach(row => {
+                            const title = row.querySelector('div:nth-child(1)').textContent.toLowerCase();
+                            const customer = row.querySelector('div:nth-child(2)').textContent.toLowerCase();
+                            const status = row.querySelector('div:nth-child(3)').textContent.toLowerCase();
+                            
+                            if (title.includes(searchTerm) || customer.includes(searchTerm) || status.includes(searchTerm)) {
+                                row.style.display = 'grid';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                    }
+                    
+                    if (activeTab === 'users') {
+                        // Filter users
+                        const usersContainer = document.getElementById('usersContainer');
+                        const allUserRows = usersContainer.querySelectorAll('.user-row');
+                        
+                        allUserRows.forEach(row => {
+                            const name = row.querySelector('div:nth-child(1)').textContent.toLowerCase();
+                            const email = row.querySelector('div:nth-child(2)').textContent.toLowerCase();
+                            const role = row.querySelector('div:nth-child(3)').textContent.toLowerCase();
+                            
+                            if (name.includes(searchTerm) || email.includes(searchTerm) || role.includes(searchTerm)) {
+                                row.style.display = 'grid';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                    }
+                    
+                    if (activeTab === 'teams') {
+                        // Filter teams
+                        const teamsContainer = document.getElementById('teamsContainer');
+                        const allTeamRows = teamsContainer.querySelectorAll('.team-row');
+                        
+                        allTeamRows.forEach(row => {
+                            const name = row.querySelector('div:nth-child(1)').textContent.toLowerCase();
+                            const description = row.querySelector('div:nth-child(2)').textContent.toLowerCase();
+                            
+                            if (name.includes(searchTerm) || description.includes(searchTerm)) {
+                                row.style.display = 'grid';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                    }
+                }, 300);
+            });
+        }
+
+        // Load customers from backend API
+        async function loadCustomers() {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const customersContainer = document.getElementById('customersContainer');
+            
+            loadingSpinner.style.display = 'block';
+            customersContainer.innerHTML = '';
+            
+            try {
+                // Get customers from backend API
+                const customers = await apiRequest('/customers');
+                
+                if (customers && customers.length > 0) {
+                    displayCustomers(customers);
+                    document.getElementById('dashboardCustomerCount').textContent = customers.length;
+                } else {
+                    customersContainer.innerHTML = '<div class="customer-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5;">No customers found</div></div>';
+                }
+            } catch (error) {
+                customersContainer.innerHTML = '<div class="customer-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5; color: var(--accent);">Error loading customers: ' + error.message + '</div></div>';
+                console.error('Error loading customers:', error);
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Load tickets from backend API
+        async function loadTickets() {
+            const loadingSpinner = document.getElementById('loadingTicketsSpinner');
+            const ticketsContainer = document.getElementById('ticketsContainer');
+            
+            loadingSpinner.style.display = 'block';
+            ticketsContainer.innerHTML = '';
+            
+            try {
+                // Get tickets from backend API
+                const tickets = await apiRequest('/tickets');
+                
+                if (tickets && tickets.length > 0) {
+                    displayTickets(tickets);
+                    document.getElementById('dashboardTicketCount').textContent = tickets.length;
+                } else {
+                    ticketsContainer.innerHTML = '<div class="ticket-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5;">No tickets found</div></div>';
+                }
+            } catch (error) {
+                ticketsContainer.innerHTML = '<div class="ticket-row"><div colspan="5" style="text-align: center; grid-column: 1 / span 5; color: var(--accent);">Error loading tickets: ' + error.message + '</div></div>';
+                console.error('Error loading tickets:', error);
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Load users from backend API
+        async function loadUsers() {
+            const loadingSpinner = document.getElementById('loadingUsersSpinner');
+            const usersContainer = document.getElementById('usersContainer');
+            
+            loadingSpinner.style.display = 'block';
+            usersContainer.innerHTML = '';
+            
+            try {
+                // Get users from backend API
+                const users = await apiRequest('/users');
+                
+                if (users && users.length > 0) {
+                    displayUsers(users);
+                    document.getElementById('dashboardAgentCount').textContent = users.filter(u => u.role === 'agent').length;
+                } else {
+                    usersContainer.innerHTML = '<div class="user-row"><div colspan="4" style="text-align: center; grid-column: 1 / span 4;">No users found</div></div>';
+                }
+            } catch (error) {
+                usersContainer.innerHTML = '<div class="user-row"><div colspan="4" style="text-align: center; grid-column: 1 / span 4; color: var(--accent);">Error loading users: ' + error.message + '</div></div>';
+                console.error('Error loading users:', error);
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Load teams from backend API
+        async function loadTeams() {
+            const loadingSpinner = document.getElementById('loadingTeamsSpinner');
+            const teamsContainer = document.getElementById('teamsContainer');
+            
+            loadingSpinner.style.display = 'block';
+            teamsContainer.innerHTML = '';
+            
+            try {
+                // Get teams from backend API
+                const teams = await apiRequest('/teams');
+                
+                if (teams && teams.length > 0) {
+                    displayTeams(teams);
+                    document.getElementById('dashboardTeamCount').textContent = teams.length;
+                } else {
+                    teamsContainer.innerHTML = '<div class="team-row"><div colspan="3" style="text-align: center; grid-column: 1 / span 3;">No teams found</div></div>';
+                }
+            } catch (error) {
+                teamsContainer.innerHTML = '<div class="team-row"><div colspan="3" style="text-align: center; grid-column: 1 / span 3; color: var(--accent);">Error loading teams: ' + error.message + '</div></div>';
+                console.error('Error loading teams:', error);
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Load ticket comments
+        async function loadTicketComments(ticketId) {
+            try {
+                const comments = await apiRequest(`/tickets/${ticketId}/comments`);
+                const commentsContainer = document.getElementById('ticketComments');
+                commentsContainer.innerHTML = '';
+                
+                if (comments && comments.length > 0) {
+                    comments.forEach(comment => {
+                        const commentEl = document.createElement('div');
+                        commentEl.className = 'comment';
+                        commentEl.innerHTML = `
+                            <div class="comment-header">
+                                <div class="comment-author">${comment.author_name || 'System'}</div>
+                                <div class="comment-date">${new Date(comment.created_at).toLocaleString()}</div>
+                            </div>
+                            <div class="comment-text">${comment.content}</div>
+                        `;
+                        commentsContainer.appendChild(commentEl);
+                    });
+                } else {
+                    commentsContainer.innerHTML = '<div class="comment"><div class="comment-text">No comments yet.</div></div>';
+                }
+            } catch (error) {
+                console.error('Error loading comments:', error);
+                document.getElementById('ticketComments').innerHTML = '<div class="comment"><div class="comment-text">Error loading comments.</div></div>';
+            }
+        }
+
+        // Display customers in the UI
+        function displayCustomers(customers) {
+            const customersContainer = document.getElementById('customersContainer');
+            customersContainer.innerHTML = '';
+            
+            customers.forEach(customer => {
+                const row = document.createElement('div');
+                row.className = 'customer-row';
+                row.innerHTML = `
+                    <div>${customer.name || 'N/A'}</div>
+                    <div>${customer.email || 'N/A'}</div>
+                    <div>${customer.phone || 'N/A'}</div>
+                    <div><span class="status status-${customer.status || 'active'}">${customer.status || 'active'}</span></div>
+                    <div class="actions">
+                        <button class="action-btn edit-btn" data-id="${customer.id}"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn delete-btn" data-id="${customer.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                customersContainer.appendChild(row);
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const customerId = btn.getAttribute('data-id');
+                    editCustomer(customerId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const customerId = btn.getAttribute('data-id');
+                    if (confirm('Are you sure you want to delete this customer?')) {
+                        deleteCustomer(customerId);
+                    }
+                });
+            });
+        }
+
+        // Display tickets in the UI
+        function displayTickets(tickets) {
+            const ticketsContainer = document.getElementById('ticketsContainer');
+            ticketsContainer.innerHTML = '';
+            
+            tickets.forEach(ticket => {
+                const row = document.createElement('div');
+                row.className = 'ticket-row';
+                row.innerHTML = `
+                    <div>${ticket.title || 'N/A'}</div>
+                    <div>${ticket.customer_name || 'Unknown Customer'}</div>
+                    <div><span class="status status-${ticket.status || 'open'}">${ticket.status || 'open'}</span></div>
+                    <div><span class="priority-${ticket.priority || 'medium'}">${ticket.priority || 'medium'}</span></div>
+                    <div class="actions">
+                        <button class="action-btn view-btn" data-id="${ticket.id}"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn edit-btn" data-id="${ticket.id}"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn delete-btn" data-id="${ticket.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                ticketsContainer.appendChild(row);
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const ticketId = btn.getAttribute('data-id');
+                    viewTicket(ticketId);
+                });
+            });
+            
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const ticketId = btn.getAttribute('data-id');
+                    editTicket(ticketId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const ticketId = btn.getAttribute('data-id');
+                    if (confirm('Are you sure you want to delete this ticket?')) {
+                        deleteTicket(ticketId);
+                    }
+                });
+            });
+        }
+
+        // Display users in the UI
+        function displayUsers(users) {
+            const usersContainer = document.getElementById('usersContainer');
+            usersContainer.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('div');
+                row.className = 'user-row';
+                row.innerHTML = `
+                    <div>${user.name || 'N/A'}</div>
+                    <div>${user.email || 'N/A'}</div>
+                    <div>${user.role || 'N/A'}</div>
+                    <div class="actions">
+                        <button class="action-btn edit-btn" data-id="${user.id}"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn delete-btn" data-id="${user.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                usersContainer.appendChild(row);
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const userId = btn.getAttribute('data-id');
+                    editUser(userId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const userId = btn.getAttribute('data-id');
+                    if (confirm('Are you sure you want to delete this user?')) {
+                        deleteUser(userId);
+                    }
+                });
+            });
+        }
+
+        // Display teams in the UI
+        function displayTeams(teams) {
+            const teamsContainer = document.getElementById('teamsContainer');
+            teamsContainer.innerHTML = '';
+            
+            teams.forEach(team => {
+                const row = document.createElement('div');
+                row.className = 'team-row';
+                row.innerHTML = `
+                    <div>${team.name || 'N/A'}</div>
+                    <div>${team.description || 'No description'}</div>
+                    <div class="actions">
+                        <button class="action-btn edit-btn" data-id="${team.id}"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn delete-btn" data-id="${team.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                teamsContainer.appendChild(row);
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const teamId = btn.getAttribute('data-id');
+                    editTeam(teamId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const teamId = btn.getAttribute('data-id');
+                    if (confirm('Are you sure you want to delete this team?')) {
+                        deleteTeam(teamId);
+                    }
+                });
+            });
+        }
+
+        // Update dashboard with latest counts
+        async function updateDashboard() {
+            try {
+                const [customers, tickets, users, teams] = await Promise.all([
+                    apiRequest('/customers'),
+                    apiRequest('/tickets'),
+                    apiRequest('/users'),
+                    apiRequest('/teams')
+                ]);
+                
+                document.getElementById('dashboardCustomerCount').textContent = customers.length;
+                document.getElementById('dashboardTicketCount').textContent = tickets.length;
+                document.getElementById('dashboardAgentCount').textContent = users.filter(u => u.role === 'agent').length;
+                document.getElementById('dashboardTeamCount').textContent = teams.length;
+                
+                // Update recent activity
+                const activityList = document.getElementById('dashboardRecentActivity');
+                activityList.innerHTML = '';
+                
+                // Add some sample activities (in a real app, you'd get these from an API)
+                const activities = [
+                    'New ticket #1234 created by John Doe',
+                    'Ticket #1235 was closed by Sarah Smith',
+                    'New customer Jane Wilson added',
+                    'User Michael Chen updated their profile'
+                ];
+                
+                activities.forEach(activity => {
+                    const li = document.createElement('li');
+                    li.textContent = activity;
+                    activityList.appendChild(li);
+                });
+                
+            } catch (error) {
+                console.error('Error updating dashboard:', error);
+            }
+        }
+
+        // View ticket details
+        async function viewTicket(ticketId) {
+            try {
+                const ticket = await apiRequest(`/tickets/${ticketId}`);
+                
+                // Populate view modal with ticket data
+                document.getElementById('viewTicketTitle').textContent = ticket.title;
+                document.getElementById('viewTicketStatus').textContent = ticket.status;
+                document.getElementById('viewTicketStatus').className = `status status-${ticket.status}`;
+                document.getElementById('viewTicketPriority').textContent = ticket.priority;
+                document.getElementById('viewTicketPriority').className = `priority-${ticket.priority}`;
+                document.getElementById('viewTicketCustomer').textContent = ticket.customer_name || 'Unknown';
+                document.getElementById('viewTicketAgent').textContent = ticket.agent_name || 'Unassigned';
+                document.getElementById('viewTicketCreated').textContent = new Date(ticket.created_at).toLocaleDateString();
+                document.getElementById('viewTicketDescription').textContent = ticket.description || 'No description provided';
+                
+                // Load comments
+                await loadTicketComments(ticketId);
+                
+                // Set up add comment button
+                document.getElementById('addCommentBtn').onclick = async () => {
+                    const commentText = document.getElementById('newComment').value.trim();
+                    if (!commentText) return;
+                    
+                    try {
+                        await apiRequest(`/tickets/${ticketId}/comments`, {
+                            method: 'POST',
+                            body: { content: commentText, author_id: 1 } // In a real app, use the logged-in user's ID
+                        });
+                        
+                        document.getElementById('newComment').value = '';
+                        await loadTicketComments(ticketId);
+                        showNotification('Comment added successfully');
+                    } catch (error) {
+                        showNotification('Error adding comment: ' + error.message, false);
+                    }
+                };
+                
+                // Show the view modal
+                document.getElementById('viewTicketModal').style.display = 'flex';
+                
+            } catch (error) {
+                showNotification('Error loading ticket details: ' + error.message, false);
+            }
+        }
+
+        // Edit customer
+        async function editCustomer(customerId) {
+            try {
+                const customer = await apiRequest(`/customers/${customerId}`);
+                
+                // Fill the form with customer data
+                document.getElementById('customerId').value = customer.id;
+                document.getElementById('name').value = customer.name || '';
+                document.getElementById('email').value = customer.email || '';
+                document.getElementById('phone').value = customer.phone || '';
+                document.getElementById('company').value = customer.company || '';
+                document.getElementById('status').value = customer.status || 'active';
+                document.getElementById('notes').value = customer.notes || '';
+                
+                // Update UI
+                document.getElementById('modalCustomerTitle').textContent = 'Edit Customer';
+                document.getElementById('submitCustomerBtn').textContent = 'Update Customer';
+                
+                // Show the modal
+                document.getElementById('addCustomerModal').style.display = 'flex';
+                
+            } catch (error) {
+                showNotification('Error loading customer data: ' + error.message, false);
+            }
+        }
+
+        // Edit ticket
+        async function editTicket(ticketId) {
+            try {
+                const ticket = await apiRequest(`/tickets/${ticketId}`);
+                
+                // Fill the form with ticket data
+                document.getElementById('ticketId').value = ticket.id;
+                document.getElementById('ticketTitle').value = ticket.title || '';
+                document.getElementById('ticketDescription').value = ticket.description || '';
+                document.getElementById('ticketStatus').value = ticket.status || 'open';
+                document.getElementById('ticketPriority').value = ticket.priority || 'medium';
+                
+                // Load customers and agents for dropdowns
+                const [customers, users] = await Promise.all([
+                    apiRequest('/customers'),
+                    apiRequest('/users')
+                ]);
+                
+                const customerSelect = document.getElementById('ticketCustomer');
+                customerSelect.innerHTML = '<option value="">Select a customer</option>';
+                customers.forEach(customer => {
+                    const option = document.createElement('option');
+                    option.value = customer.id;
+                    option.textContent = customer.name;
+                    option.selected = (customer.id === ticket.customer_id);
+                    customerSelect.appendChild(option);
+                });
+                
+                const agentSelect = document.getElementById('ticketAgent');
+                agentSelect.innerHTML = '<option value="">Unassigned</option>';
+                users.filter(user => user.role === 'agent').forEach(agent => {
+                    const option = document.createElement('option');
+                    option.value = agent.id;
+                    option.textContent = agent.name;
+                    option.selected = (agent.id === ticket.assigned_to);
+                    agentSelect.appendChild(option);
+                });
+                
+                // Update UI
+                document.getElementById('modalTicketTitle').textContent = 'Edit Ticket';
+                document.getElementById('submitTicketBtn').textContent = 'Update Ticket';
+                
+                // Show the modal
+                document.getElementById('addTicketModal').style.display = 'flex';
+                
+            } catch (error) {
+                showNotification('Error loading ticket data: ' + error.message, false);
+            }
+        }
+
+        // Edit user
+        async function editUser(userId) {
+            try {
+                const user = await apiRequest(`/users/${userId}`);
+                
+                // Fill the form with user data
+                document.getElementById('userId').value = user.id;
+                document.getElementById('userName').value = user.name || '';
+                document.getElementById('userEmail').value = user.email || '';
+                document.getElementById('userRole').value = user.role || 'agent';
+                document.getElementById('userStatus').value = user.status || 'active';
+                
+                // Update UI
+                document.getElementById('modalUserTitle').textContent = 'Edit User';
+                document.getElementById('submitUserBtn').textContent = 'Update User';
+                
+                // Show the modal
+                document.getElementById('addUserModal').style.display = 'flex';
+                
+            } catch (error) {
+                showNotification('Error loading user data: ' + error.message, false);
+            }
+        }
+
+        // Edit team
+        async function editTeam(teamId) {
+            try {
+                const team = await apiRequest(`/teams/${teamId}`);
+                
+                // Fill the form with team data
+                document.getElementById('teamId').value = team.id;
+                document.getElementById('teamName').value = team.name || '';
+                document.getElementById('teamDescription').value = team.description || '';
+                
+                // Load users for multi-select
+                const users = await apiRequest('/users');
+                const membersSelect = document.getElementById('teamMembers');
+                membersSelect.innerHTML = '';
+                
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = user.name;
+                    // In a real app, you would check if this user is a member of the team
+                    membersSelect.appendChild(option);
+                });
+                
+                // Update UI
+                document.getElementById('modalTeamTitle').textContent = 'Edit Team';
+                document.getElementById('submitTeamBtn').textContent = 'Update Team';
+                
+                // Show the modal
+                document.getElementById('addTeamModal').style.display = 'flex';
+                
+            } catch (error) {
+                showNotification('Error loading team data: ' + error.message, false);
+            }
+        }
+
+        // Delete customer
+        async function deleteCustomer(id) {
+            try {
+                await apiRequest(`/customers/${id}`, { method: 'DELETE' });
+                showNotification('Customer deleted successfully');
+                loadCustomers();
+                updateDashboard();
+            } catch (error) {
+                showNotification('Error deleting customer: ' + error.message, false);
+            }
+        }
+
+        // Delete ticket
+        async function deleteTicket(id) {
+            try {
+                await apiRequest(`/tickets/${id}`, { method: 'DELETE' });
+                showNotification('Ticket deleted successfully');
+                loadTickets();
+                updateDashboard();
+            } catch (error) {
+                showNotification('Error deleting ticket: ' + error.message, false);
+            }
+        }
+
+        // Delete user
+        async function deleteUser(id) {
+            try {
+                await apiRequest(`/users/${id}`, { method: 'DELETE' });
+                showNotification('User deleted successfully');
+                loadUsers();
+                updateDashboard();
+            } catch (error) {
+                showNotification('Error deleting user: ' + error.message, false);
+            }
+        }
+
+        // Delete team
+        async function deleteTeam(id) {
+            try {
+                await apiRequest(`/teams/${id}`, { method: 'DELETE' });
+                showNotification('Team deleted successfully');
+                loadTeams();
+                updateDashboard();
+            } catch (error) {
+                showNotification('Error deleting team: ' + error.message, false);
+            }
+        }
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            // ... your existing initialization code ...
+            // Set up tab navigation
+            const menuItems = document.querySelectorAll('.menu-item');
+            const contentAreas = {
+                dashboard: document.getElementById('dashboardContent'),
+                customers: document.getElementById('customersContent'),
+                tickets: document.getElementById('ticketsContent'),
+                teams: document.getElementById('teamsContent'),
+                users: document.getElementById('usersContent'),
+                analytics: document.getElementById('analyticsContent'),
+                settings: document.getElementById('settingsContent')
+            };
             
-            // Set up settings with production values
+            function showTab(tabName) {
+                // Hide all content areas
+                Object.values(contentAreas).forEach(area => {
+                    area.style.display = 'none';
+                });
+                
+                // Show the selected tab
+                if (contentAreas[tabName]) {
+                    contentAreas[tabName].style.display = 'block';
+                }
+                
+                // Load data for the selected tab
+                if (tabName === 'customers') loadCustomers();
+                if (tabName === 'tickets') loadTickets();
+                if (tabName === 'users') loadUsers();
+                if (tabName === 'teams') loadTeams();
+                if (tabName === 'analytics') updateAnalytics();
+            }
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Show the corresponding tab
+                    const tabName = this.getAttribute('data-tab');
+                    if (tabName) {
+                        showTab(tabName);
+                    }
+                });
+            });
+            
+            // Set up modal functionality
+            const modals = document.querySelectorAll('.modal');
+            const closeButtons = document.querySelectorAll('.close');
+            
+            function closeAllModals() {
+                modals.forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            }
+            
+            closeButtons.forEach(button => {
+                button.addEventListener('click', closeAllModals);
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal')) {
+                    closeAllModals();
+                }
+            });
+            
+            // Set up customer form
+            const customerForm = document.getElementById('customerForm');
+            customerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const customerId = document.getElementById('customerId').value;
+                const customerData = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    company: document.getElementById('company').value,
+                    status: document.getElementById('status').value,
+                    notes: document.getElementById('notes').value
+                };
+                
+                try {
+                    if (customerId) {
+                        // Update existing customer
+                        await apiRequest(`/customers/${customerId}`, {
+                            method: 'PUT',
+                            body: customerData
+                        });
+                        showNotification('Customer updated successfully');
+                    } else {
+                        // Add new customer
+                        await apiRequest('/customers', {
+                            method: 'POST',
+                            body: customerData
+                        });
+                        showNotification('Customer created successfully');
+                    }
+                    
+                    closeAllModals();
+                    loadCustomers();
+                    updateDashboard();
+                } catch (error) {
+                    showNotification('Error saving customer: ' + error.message, false);
+                }
+            });
+            
+            // Set up ticket form
+            const ticketForm = document.getElementById('ticketForm');
+            ticketForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const ticketId = document.getElementById('ticketId').value;
+                const ticketData = {
+                    title: document.getElementById('ticketTitle').value,
+                    description: document.getElementById('ticketDescription').value,
+                    customer_id: document.getElementById('ticketCustomer').value,
+                    status: document.getElementById('ticketStatus').value,
+                    priority: document.getElementById('ticketPriority').value,
+                    assigned_to: document.getElementById('ticketAgent').value || null
+                };
+                
+                try {
+                    if (ticketId) {
+                        // Update existing ticket
+                        await apiRequest(`/tickets/${ticketId}`, {
+                            method: 'PUT',
+                            body: ticketData
+                        });
+                        showNotification('Ticket updated successfully');
+                    } else {
+                        // Add new ticket
+                        await apiRequest('/tickets', {
+                            method: 'POST',
+                            body: ticketData
+                        });
+                        showNotification('Ticket created successfully');
+                    }
+                    
+                    closeAllModals();
+                    loadTickets();
+                    updateDashboard();
+                } catch (error) {
+                    showNotification('Error saving ticket: ' + error.message, false);
+                }
+            });
+            
+            // Set up user form
+            const userForm = document.getElementById('userForm');
+            userForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const userId = document.getElementById('userId').value;
+                const userData = {
+                    name: document.getElementById('userName').value,
+                    email: document.getElementById('userEmail').value,
+                    role: document.getElementById('userRole').value,
+                    status: document.getElementById('userStatus').value
+                };
+                
+                try {
+                    if (userId) {
+                        // Update existing user
+                        await apiRequest(`/users/${userId}`, {
+                            method: 'PUT',
+                            body: userData
+                        });
+                        showNotification('User updated successfully');
+                    } else {
+                        // Add new user
+                        await apiRequest('/users', {
+                            method: 'POST',
+                            body: userData
+                        });
+                        showNotification('User created successfully');
+                    }
+                    
+                    closeAllModals();
+                    loadUsers();
+                    updateDashboard();
+                } catch (error) {
+                    showNotification('Error saving user: ' + error.message, false);
+                }
+            });
+            
+            // Set up team form
+            const teamForm = document.getElementById('teamForm');
+            teamForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const teamId = document.getElementById('teamId').value;
+                const teamData = {
+                    name: document.getElementById('teamName').value,
+                    description: document.getElementById('teamDescription').value,
+                    members: Array.from(document.getElementById('teamMembers').selectedOptions).map(option => option.value)
+                };
+                
+                try {
+                    if (teamId) {
+                        // Update existing team
+                        await apiRequest(`/teams/${teamId}`, {
+                            method: 'PUT',
+                            body: teamData
+                        });
+                        showNotification('Team updated successfully');
+                    } else {
+                        // Add new team
+                        await apiRequest('/teams', {
+                            method: 'POST',
+                            body: teamData
+                        });
+                        showNotification('Team created successfully');
+                    }
+                    
+                    closeAllModals();
+                    loadTeams();
+                    updateDashboard();
+                } catch (error) {
+                    showNotification('Error saving team: ' + error.message, false);
+                }
+            });
+            
+            // Set up add buttons
+            document.getElementById('addCustomerBtn').addEventListener('click', () => {
+                document.getElementById('customerForm').reset();
+                document.getElementById('customerId').value = '';
+                document.getElementById('modalCustomerTitle').textContent = 'Add New Customer';
+                document.getElementById('submitCustomerBtn').textContent = 'Save Customer';
+                document.getElementById('addCustomerModal').style.display = 'flex';
+            });
+            
+            document.getElementById('addCustomerFab').addEventListener('click', () => {
+                document.getElementById('customerForm').reset();
+                document.getElementById('customerId').value = '';
+                document.getElementById('modalCustomerTitle').textContent = 'Add New Customer';
+                document.getElementById('submitCustomerBtn').textContent = 'Save Customer';
+                document.getElementById('addCustomerModal').style.display = 'flex';
+            });
+            
+            document.getElementById('addTicketBtn').addEventListener('click', async () => {
+                document.getElementById('ticketForm').reset();
+                document.getElementById('ticketId').value = '';
+                document.getElementById('modalTicketTitle').textContent = 'Add New Ticket';
+                document.getElementById('submitTicketBtn').textContent = 'Save Ticket';
+                
+                // Load customers and agents for dropdowns
+                try {
+                    const [customers, users] = await Promise.all([
+                        apiRequest('/customers'),
+                        apiRequest('/users')
+                    ]);
+                    
+                    const customerSelect = document.getElementById('ticketCustomer');
+                    customerSelect.innerHTML = '<option value="">Select a customer</option>';
+                    customers.forEach(customer => {
+                        const option = document.createElement('option');
+                        option.value = customer.id;
+                        option.textContent = customer.name;
+                        customerSelect.appendChild(option);
+                    });
+                    
+                    const agentSelect = document.getElementById('ticketAgent');
+                    agentSelect.innerHTML = '<option value="">Unassigned</option>';
+                    users.filter(user => user.role === 'agent').forEach(agent => {
+                        const option = document.createElement('option');
+                        option.value = agent.id;
+                        option.textContent = agent.name;
+                        agentSelect.appendChild(option);
+                    });
+                    
+                    document.getElementById('addTicketModal').style.display = 'flex';
+                } catch (error) {
+                    showNotification('Error loading form data: ' + error.message, false);
+                }
+            });
+            
+            document.getElementById('addTicketFab').addEventListener('click', () => {
+                document.getElementById('addTicketBtn').click();
+            });
+            
+            document.getElementById('addUserBtn').addEventListener('click', () => {
+                document.getElementById('userForm').reset();
+                document.getElementById('userId').value = '';
+                document.getElementById('modalUserTitle').textContent = 'Add New User';
+                document.getElementById('submitUserBtn').textContent = 'Save User';
+                document.getElementById('addUserModal').style.display = 'flex';
+            });
+            
+            document.getElementById('addTeamBtn').addEventListener('click', async () => {
+                document.getElementById('teamForm').reset();
+                document.getElementById('teamId').value = '';
+                document.getElementById('modalTeamTitle').textContent = 'Add New Team';
+                document.getElementById('submitTeamBtn').textContent = 'Save Team';
+                
+                // Load users for multi-select
+                try {
+                    const users = await apiRequest('/users');
+                    const membersSelect = document.getElementById('teamMembers');
+                    membersSelect.innerHTML = '';
+                    
+                    users.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = user.name;
+                        membersSelect.appendChild(option);
+                    });
+                    
+                    document.getElementById('addTeamModal').style.display = 'flex';
+                } catch (error) {
+                    showNotification('Error loading users: ' + error.message, false);
+                }
+            });
+            
+            // Set up cancel buttons
+            document.getElementById('cancelCustomerBtn').addEventListener('click', closeAllModals);
+            document.getElementById('cancelTicketBtn').addEventListener('click', closeAllModals);
+            document.getElementById('cancelUserBtn').addEventListener('click', closeAllModals);
+            document.getElementById('cancelTeamBtn').addEventListener('click', closeAllModals);
+            
+            // Set up settings
             document.getElementById('apiUrl').value = API_BASE_URL;
             document.getElementById('websocketUrl').value = WS_URL;
+            
+            document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+                API_BASE_URL = document.getElementById('apiUrl').value;
+                WS_URL = document.getElementById('websocketUrl').value;
+                
+                localStorage.setItem('apiUrl', API_BASE_URL);
+                localStorage.setItem('websocketUrl', WS_URL);
+                
+                // Reinitialize WebSocket connection
+                initWebSocket();
+                
+                showNotification('Settings saved successfully');
+            });
+            
+            // Set up search
+            setupSearch();
             
             // Initialize the app
             showTab('dashboard');
@@ -197,6 +2186,83 @@
             loadUsers();
             loadTeams();
         });
+
+        // Update analytics charts
+        async function updateAnalytics() {
+            try {
+                const tickets = await apiRequest('/tickets');
+                
+                // Tickets by status
+                const statusCounts = {
+                    open: 0,
+                    pending: 0,
+                    closed: 0
+                };
+                
+                tickets.forEach(ticket => {
+                    if (statusCounts.hasOwnProperty(ticket.status)) {
+                        statusCounts[ticket.status]++;
+                    }
+                });
+                
+                const statusCtx = document.getElementById('ticketStatusChart').getContext('2d');
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Open', 'Pending', 'Closed'],
+                        datasets: [{
+                            data: [statusCounts.open, statusCounts.pending, statusCounts.closed],
+                            backgroundColor: ['#3B82F6', '#F59E0B', '#6B7280']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                
+                // Tickets by priority
+                const priorityCounts = {
+                    low: 0,
+                    medium: 0,
+                    high: 0
+                };
+                
+                tickets.forEach(ticket => {
+                    if (priorityCounts.hasOwnProperty(ticket.priority)) {
+                        priorityCounts[ticket.priority]++;
+                    }
+                });
+                
+                const priorityCtx = document.getElementById('ticketPriorityChart').getContext('2d');
+                new Chart(priorityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Low', 'Medium', 'High'],
+                        datasets: [{
+                            label: 'Tickets by Priority',
+                            data: [priorityCounts.low, priorityCounts.medium, priorityCounts.high],
+                            backgroundColor: ['#10B981', '#F59E0B', '#EF4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading analytics data:', error);
+            }
+        }
     </script>
 </body>
 </html>
