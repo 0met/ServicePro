@@ -3,6 +3,7 @@ const { Pool } = require('pg');
 const cors = require('cors');
 const WebSocket = require('ws');
 const http = require('http');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -10,11 +11,18 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 const PORT = process.env.PORT || 3001;
-const WS_PORT = process.env.WS_PORT || 3002;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['https://customermanagerpro.netlify.app', 'http://localhost:3000', 'http://localhost:5173'],
+  credentials: true
+}));
 app.use(express.json());
+
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'public')));
+}
 
 // Neon DB connection
 const pool = new Pool({
@@ -34,11 +42,18 @@ pool.connect((err, client, release) => {
 });
 
 // WebSocket connection handling
-wss.on('connection', function connection(ws) {
-  console.log('WebSocket client connected');
+wss.on('connection', function connection(ws, req) {
+  console.log('WebSocket client connected from:', req.headers.origin);
+  
+  // Send a welcome message
+  ws.send(JSON.stringify({ type: 'CONNECTED', data: { message: 'WebSocket connected successfully' } }));
   
   ws.on('close', function() {
     console.log('WebSocket client disconnected');
+  });
+  
+  ws.on('error', function(error) {
+    console.error('WebSocket error:', error);
   });
 });
 
@@ -47,12 +62,21 @@ function broadcastMessage(type, data) {
   const message = JSON.stringify({ type, data });
   wss.clients.forEach(function each(client) {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
+      try {
+        client.send(message);
+      } catch (error) {
+        console.error('Error sending WebSocket message:', error);
+      }
     }
   });
 }
 
-// Routes
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// API Routes
 
 // Customers routes
 app.get('/api/customers', async (req, res) => {
@@ -458,11 +482,15 @@ app.delete('/api/teams/:id', async (req, res) => {
   }
 });
 
-// Start servers
-app.listen(PORT, () => {
-  console.log(`API server running on port ${PORT}`);
-});
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+}
 
-server.listen(WS_PORT, () => {
-  console.log(`WebSocket server running on port ${WS_PORT}`);
+// Start server
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
